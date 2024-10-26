@@ -1,8 +1,16 @@
-# Population Growth/Decline Rates
-HUMAN_GROWTH_RATE = 1.1  # 10% growth
-HUMAN_DECLINE_RATE = 0.9  # 10% decline
-TREE_GROWTH_RATE = 1.05  # 5% growth
-WILDLIFE_DECLINE_RATE = 0.5  # 50% decline
+# Population Growth/Decline Rates (yearly rates converted to daily)
+HUMAN_GROWTH_RATE = 1.0003  # ~11% yearly growth
+HUMAN_DECLINE_RATE = 0.9997  # ~11% yearly decline
+TREE_GROWTH_RATE = 1.0001  # ~3.7% yearly growth
+WILDLIFE_DECLINE_RATE = 0.999  # ~30% yearly decline
+
+# Population Density Limits (per cell)
+MAX_HUMAN_DENSITY = 1000  # maximum humans per city cell
+MAX_TREE_DENSITY = 500   # maximum trees per forest cell
+
+# Cell Conversion Thresholds
+CITY_ABANDONMENT_DAYS = 365  # days before a city can convert to land
+LAND_TO_FOREST_DAYS = 1825   # 5 years of no use before land can become forest
 
 # Health Impact Rates
 AIR_POLLUTION_HEALTH_IMPACT = -0.15

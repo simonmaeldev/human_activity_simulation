@@ -50,16 +50,64 @@ class HumanPopulation(BasePopulationProcess):
             # Wait for next day
             await self.env.timeout(1)  # One step = one day
 
+    def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
+        super().__init__(env, population, cell, config)
+        self.work_cycle = env.process(self.daily_cycle())
+        self.growth_cycle = env.process(self.growth_process())
+        self.health_cycle = env.process(self.health_update_process())
+        self.days_abandoned = 0  # Track how long a city has been below viable population
+
     async def growth_process(self):
         while self.active:
-            if (self.cell.health_level > self.config.health_thresholds["good"] and 
-                self.cell.resource_level > self.config.population_growth_decline_thresholds["growth"]):
-                self.population.size = int(self.population.size * HUMAN_GROWTH_RATE)
-            elif (self.cell.health_level < self.config.health_thresholds["poor"] or 
-                  self.cell.resource_level < self.config.population_growth_decline_thresholds["decline"]):
+            current_density = self.population.size
+            growth_conditions = (
+                self.cell.health_level > self.config.health_thresholds["good"] and 
+                self.cell.resource_level > self.config.population_growth_decline_thresholds["growth"]
+            )
+            decline_conditions = (
+                self.cell.health_level < self.config.health_thresholds["poor"] or 
+                self.cell.resource_level < self.config.population_growth_decline_thresholds["decline"]
+            )
+
+            if growth_conditions:
+                if current_density < MAX_HUMAN_DENSITY:
+                    # Normal growth within density limits
+                    self.population.size = int(self.population.size * HUMAN_GROWTH_RATE)
+                else:
+                    # Try to expand to adjacent land
+                    await self.try_expand_city()
+            elif decline_conditions:
                 self.population.size = int(self.population.size * HUMAN_DECLINE_RATE)
+                
+                # Track abandonment
+                if self.population.size < MAX_HUMAN_DENSITY * 0.1:  # Less than 10% capacity
+                    self.days_abandoned += 7
+                    if self.days_abandoned >= CITY_ABANDONMENT_DAYS:
+                        self.cell.cell_type = CellType.LAND
+                else:
+                    self.days_abandoned = 0
             
-            await self.env.timeout(7)  # Check weekly (7 days)
+            await self.env.timeout(7)  # Check weekly
+
+    async def try_expand_city(self):
+        for neighbor in self.cell.neighbors:
+            if (neighbor.cell_type == CellType.LAND and 
+                neighbor.health_level > self.config.health_thresholds["good"] and
+                not any(p.type == PopulationType.HUMANS for p in neighbor.populations)):
+                # Convert land to city
+                neighbor.cell_type = CellType.CITY
+                # Create new human population in the new city
+                initial_population = int(self.population.size * 0.1)  # 10% of original population moves
+                self.population.size -= initial_population
+                new_pop = Population(
+                    type=PopulationType.HUMANS,
+                    size=initial_population,
+                    health_level=self.population.health_level,
+                    resource_consumption_rate=self.population.resource_consumption_rate,
+                    pollution_generation_rate=self.population.pollution_generation_rate
+                )
+                neighbor.populations.append(new_pop)
+                break
 
     async def health_update_process(self):
         while self.active:
@@ -90,22 +138,43 @@ class TreePopulation(BasePopulationProcess):
             self.cell.global_co2_level -= absorption_rate
             await self.env.timeout(1)
 
+    def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
+        super().__init__(env, population, cell, config)
+        self.co2_process = env.process(self.co2_absorption_process())
+        self.growth_process = env.process(self.growth_cycle())
+        self.days_unused = 0  # Track how long land has been unused
+
     async def growth_cycle(self):
         while self.active:
-            if (self.cell.health_level > 70 and 
-                self.cell.resource_level > self.config.resource_regeneration_rates["forest"]):
-                self.population.size = int(self.population.size * TREE_GROWTH_RATE)
+            current_density = self.population.size
+            growth_conditions = (
+                self.cell.health_level > 70 and 
+                self.cell.resource_level > self.config.resource_regeneration_rates["forest"]
+            )
+
+            if growth_conditions:
+                if current_density < MAX_TREE_DENSITY:
+                    self.population.size = int(self.population.size * TREE_GROWTH_RATE)
                 
                 # Potential spread to adjacent cells
                 for neighbor in self.cell.neighbors:
-                    if (neighbor.cell_type == CellType.LAND and 
-                        neighbor.health_level > 80 and 
-                        neighbor.resource_level > self.config.resource_regeneration_rates["forest"]):
-                        # Chance to convert to forest
-                        if random.random() < FOREST_SPREAD_CHANCE:
-                            neighbor.cell_type = CellType.FOREST
+                    if neighbor.cell_type == CellType.LAND:
+                        if not any(p.type != PopulationType.TREES for p in neighbor.populations):
+                            neighbor.days_unused += 30
+                            if (neighbor.days_unused >= LAND_TO_FOREST_DAYS and
+                                neighbor.health_level > 80 and
+                                neighbor.resource_level > self.config.resource_regeneration_rates["forest"] and
+                                random.random() < FOREST_SPREAD_CHANCE):
+                                neighbor.cell_type = CellType.FOREST
+                                neighbor.days_unused = 0
+                    elif neighbor.cell_type == CellType.CITY:
+                        if neighbor.days_abandoned >= CITY_ABANDONMENT_DAYS:
+                            # Abandoned cities can be reclaimed by forest
+                            if random.random() < FOREST_SPREAD_CHANCE:
+                                neighbor.cell_type = CellType.FOREST
+                                neighbor.days_abandoned = 0
             
-            await self.env.timeout(24 * 30)  # Monthly growth check
+            await self.env.timeout(30)  # Monthly growth check
 
 class WildlifePopulation(BasePopulationProcess):
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
