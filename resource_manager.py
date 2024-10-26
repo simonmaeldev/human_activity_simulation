@@ -63,7 +63,20 @@ class ResourceManager:
         return consumption_results
 
     def regenerate_resources(self, cell: Cell):
-        """Regenerate resources based on cell health and type"""
+        """
+        Regenerates resources in a cell based on multiple factors.
+        
+        This function models natural resource regeneration by:
+        1. Using base regeneration rate specific to cell type (forests regenerate faster than cities)
+        2. Scaling by cell health (damaged cells regenerate slower)
+        3. Reducing regeneration based on pollution (polluted areas recover slower)
+        4. Capping resources at 100% to prevent overflow
+        
+        Design choices:
+        - Multiplicative factors rather than additive to model compound effects
+        - Cell type specific rates allow fine-tuning of different biomes
+        - Resource cap prevents unrealistic accumulation
+        """
         base_rate = self.config.resource_regeneration_rates[cell.cell_type.value]
         health_factor = cell.health_level / 100
         pollution_factor = 1 - (cell.current_pollution_level / 100)
@@ -72,14 +85,50 @@ class ResourceManager:
         cell.resource_level = min(100, cell.resource_level + regeneration)
 
     def transfer_resources(self, source: Cell, target: Cell, amount: float):
-        """Transfer resources between cells"""
+        """
+        Transfers resources between cells safely.
+        
+        This critical function:
+        1. Ensures we never transfer more than available
+        2. Maintains conservation of resources
+        3. Returns actual amount transferred for tracking
+        
+        Design choices:
+        - Uses min() to prevent negative resources
+        - Atomic operation (both cells updated together)
+        - Returns transfer amount for verification
+        
+        Args:
+            source: Cell giving resources
+            target: Cell receiving resources
+            amount: Desired transfer amount
+            
+        Returns:
+            float: Actual amount transferred
+        """
         actual_transfer = min(amount, source.resource_level)
         source.resource_level -= actual_transfer
         target.resource_level += actual_transfer
         return actual_transfer
 
     def calculate_resource_quality(self, cell: Cell) -> float:
-        """Calculate resource quality (0-1) based on pollution and health"""
+        """
+        Calculates the quality of resources in a cell.
+        
+        This function determines resource quality by:
+        1. Converting pollution level to quality impact (higher pollution = lower quality)
+        2. Factoring in cell health (healthier cells = better quality)
+        3. Averaging these factors for final quality score
+        4. Clamping result between 0-1
+        
+        Design choices:
+        - Equal weighting between health and pollution
+        - Uses average rather than multiplication to avoid too-low values
+        - Bounded output ensures consistent range for consumers
+        
+        Returns:
+            float: Resource quality score between 0.0 (worst) and 1.0 (best)
+        """
         pollution_impact = cell.current_pollution_level / 100
         health_factor = cell.health_level / 100
         return max(0, min(1, (health_factor + (1 - pollution_impact)) / 2))
