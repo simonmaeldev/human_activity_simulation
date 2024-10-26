@@ -243,35 +243,82 @@ class WildlifePopulation(BasePopulationProcess):
         self.relocation_process = env.process(self.relocation_check_process())
 
     async def resource_consumption_process(self):
+        """
+        Manages wildlife resource consumption and related health impacts.
+        
+        This process:
+        1. Calculates and consumes resources based on population size
+        2. Adjusts health based on resource quality and pollution
+        3. Applies base health decline to model natural attrition
+        4. Runs daily to simulate continuous resource needs
+        
+        The process models realistic wildlife behavior where:
+        - Resource consumption is limited by availability
+        - Polluted resources negatively impact health
+        - Population naturally declines without sufficient resources
+        """
         while self.active:
+            # Calculate and apply resource consumption
             consumed = min(self.cell.resource_level, 
                          self.population.resource_consumption_rate * self.population.size)
             self.cell.resource_level -= consumed
             
-            # Health impact based on resource quality
+            # Calculate health impact based on resource quality
             quality_factor = 1 - (self.cell.current_pollution_level / 100)
             await self.update_health((consumed / self.population.size) * quality_factor - WILDLIFE_BASE_HEALTH_DECLINE)
             
-            await self.env.timeout(1)
+            await self.env.timeout(1)  # Daily consumption cycle
 
     async def relocation_check_process(self):
+        """
+        Manages wildlife population movement and survival based on environmental conditions.
+        
+        This process:
+        1. Monitors cell health conditions
+        2. Triggers wildlife relocation when conditions become critical
+        3. Reduces population if no suitable habitat is found
+        4. Can lead to local extinction if conditions remain poor
+        
+        The process models realistic wildlife behavior where:
+        - Animals attempt to relocate when habitat becomes unhealthy
+        - Population declines if unable to find suitable new habitat
+        - Complete population loss can occur in sustained poor conditions
+        """
         while self.active:
             if self.cell.health_level < self.config.health_thresholds["critical"]:
                 suitable_cell = self.find_suitable_cell()
                 if suitable_cell:
-                    # Move population to new cell
+                    # Relocate population to healthier habitat
                     suitable_cell.populations.append(self.population)
                     self.cell.populations.remove(self.population)
                     self.cell = suitable_cell
                 else:
-                    # Population dies off
+                    # Population decline due to habitat loss
                     self.population.size = int(self.population.size * 0.5)
                     if self.population.size <= 0:
-                        self.stop()
+                        self.stop()  # Population extinction
             
-            await self.env.timeout(24)  # Daily check
+            await self.env.timeout(24)  # Daily habitat assessment
 
     def find_suitable_cell(self) -> Optional[Cell]:
+        """
+        Searches for a suitable new habitat cell for wildlife relocation.
+        
+        This method:
+        1. Evaluates neighboring cells for habitat suitability
+        2. Considers cell health and existing populations
+        3. Prioritizes cells of matching type (forest/lake)
+        
+        Returns:
+            Optional[Cell]: A suitable cell for relocation, or None if none found
+        
+        Note: Current implementation is a placeholder. Full implementation
+        would need to consider:
+        - Distance from current cell
+        - Resource availability
+        - Existing wildlife populations
+        - Migration corridors
+        """
         # Find nearest cell with good health and matching type
         # Implementation depends on grid structure
         return None
