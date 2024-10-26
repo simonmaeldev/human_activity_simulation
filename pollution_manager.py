@@ -1,0 +1,83 @@
+from typing import List, Tuple
+from cell import Cell, CellType
+from config_model import ConfigModel
+from constants import (
+    AIR_SPREAD_RATE, GROUND_SPREAD_RATE,
+    AIR_TO_GROUND_RATE
+)
+
+class PollutionManager:
+    def __init__(self, config: ConfigModel):
+        self.config = config
+        self.global_co2_level = config.initial_co2_level
+        self.spread_rates = config.pollution_spread_rates
+
+    def add_co2(self, amount: float):
+        """Add CO2 from human activity"""
+        self.global_co2_level += amount
+
+    def reduce_co2(self, amount: float):
+        """Reduce CO2 from tree absorption"""
+        self.global_co2_level = max(0, self.global_co2_level - amount)
+
+    def spread_pollution(self, grid: List[List[Cell]]):
+        """Handle all pollution spread mechanics"""
+        new_air = [[0.0 for _ in row] for row in grid]
+        new_ground = [[0.0 for _ in row] for row in grid]
+        
+        for i, row in enumerate(grid):
+            for j, cell in enumerate(row):
+                neighbors = self._get_valid_neighbors(grid, i, j)
+                
+                # Air pollution spread
+                air_out = cell.air_pollution_level * AIR_SPREAD_RATE
+                air_per_neighbor = air_out / (len(neighbors) or 1)
+                new_air[i][j] = cell.air_pollution_level - air_out
+                
+                # Ground pollution spread
+                ground_out = cell.ground_pollution_level * GROUND_SPREAD_RATE
+                ground_per_neighbor = ground_out / (len(neighbors) or 1)
+                new_ground[i][j] = cell.ground_pollution_level - ground_out
+                
+                # Distribute to neighbors
+                for ni, nj in neighbors:
+                    new_air[ni][nj] += air_per_neighbor
+                    new_ground[ni][nj] += ground_per_neighbor
+        
+        # Update cells with new values and handle settling
+        self._update_pollution_levels(grid, new_air, new_ground)
+
+    def _get_valid_neighbors(self, grid: List[List[Cell]], i: int, j: int) -> List[Tuple[int, int]]:
+        """Get valid neighboring cell coordinates"""
+        neighbors = []
+        for di, dj in [(-1,0), (1,0), (0,-1), (0,1)]:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < len(grid) and 0 <= nj < len(grid[0]):
+                neighbors.append((ni, nj))
+        return neighbors
+
+    def _update_pollution_levels(self, grid: List[List[Cell]], new_air: List[List[float]], 
+                               new_ground: List[List[float]]):
+        """Update pollution levels and handle air-to-ground settling"""
+        for i, row in enumerate(grid):
+            for j, cell in enumerate(row):
+                # Air pollution settling into ground
+                settling = new_air[i][j] * AIR_TO_GROUND_RATE
+                new_air[i][j] -= settling
+                new_ground[i][j] += settling
+                
+                # Apply natural decay based on cell type
+                decay_rate = self.config.base_pollution_decay_rate
+                if cell.cell_type == CellType.FOREST:
+                    decay_rate *= 2  # Forests clean pollution faster
+                
+                new_air[i][j] *= (1 - decay_rate)
+                new_ground[i][j] *= (1 - decay_rate)
+                
+                # Update cell values
+                cell.air_pollution_level = new_air[i][j]
+                cell.ground_pollution_level = new_ground[i][j]
+
+    def get_current_co2(self) -> float:
+        """Get current global CO2 level"""
+        return self.global_co2_level
