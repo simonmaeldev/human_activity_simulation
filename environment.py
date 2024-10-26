@@ -1,4 +1,5 @@
 import simpy
+import random
 from typing import List, Tuple
 from cell import Cell, CellType
 from config_model import ConfigModel
@@ -11,7 +12,9 @@ class Environment:
         self.config = config
 
     def _initialize_grid(self, grid_size: Tuple[int, int]) -> List[List[Cell]]:
-        return [[Cell(position=(x, y), cell_type=CellType.LAND) for y in range(grid_size[1])] for x in range(grid_size[0])]
+        return [[Cell(position=(x, y), cell_type=random.choice(list(CellType))) 
+                for y in range(grid_size[1])] 
+                for x in range(grid_size[0])]
 
     def get_neighbors(self, x: int, y: int) -> List[Cell]:
         neighbors = []
