@@ -32,23 +32,15 @@ class HumanPopulation(BasePopulationProcess):
 
     async def daily_cycle(self):
         while self.active:
-            # Morning commute
-            self.cell.current_pollution_level += self.population.pollution_generation_rate
-            await self.env.timeout(1)
-
-            # Work period
-            await self.env.timeout(self.config.human_work_cycle_duration)
-
-            # Resource consumption
+            # Daily activities (all happening in one day)
+            # Work and commuting pollution
+            self.cell.current_pollution_level += self.population.pollution_generation_rate * 2  # Two commutes per day
+            
+            # Daily resource consumption
             self.cell.resource_level -= (self.population.resource_consumption_rate * self.population.size)
-            await self.env.timeout(1)
-
-            # Evening commute
-            self.cell.current_pollution_level += self.population.pollution_generation_rate
-            await self.env.timeout(1)
-
-            # Rest period
-            await self.env.timeout(12)  # 12-hour rest period
+            
+            # Wait for next day
+            await self.env.timeout(1)  # One step = one day
 
     async def growth_process(self):
         while self.active:
@@ -59,7 +51,7 @@ class HumanPopulation(BasePopulationProcess):
                   self.cell.resource_level < self.config.population_growth_decline_thresholds["decline"]):
                 self.population.size = int(self.population.size * 0.9)  # 10% decline
             
-            await self.env.timeout(24 * 7)  # Check weekly
+            await self.env.timeout(7)  # Check weekly (7 days)
 
     async def health_update_process(self):
         while self.active:
