@@ -15,7 +15,23 @@ from constants import (
 )
 
 class BasePopulationProcess:
+    """
+    Base class for all population processes in the simulation.
+    Provides common functionality for population management and health updates.
+    
+    This abstract class defines the interface that all population types must implement,
+    ensuring consistent behavior across different population types (humans, trees, wildlife).
+    """
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
+        """
+        Initialize a population process with its environment and configuration.
+        
+        Args:
+            env: SimPy environment for process scheduling
+            population: The population being managed
+            cell: The cell where this population exists
+            config: Global configuration parameters
+        """
         self.env = env
         self.population = population
         self.cell = cell
@@ -24,12 +40,23 @@ class BasePopulationProcess:
         self.process = env.process(self.run())
 
     def stop(self):
+        """Gracefully stop this population process"""
         self.active = False
 
     async def run(self):
+        """
+        Abstract method that must be implemented by subclasses.
+        Defines the main behavior loop for each population type.
+        """
         raise NotImplementedError("Subclasses must implement run()")
 
     async def update_health(self, amount: float):
+        """
+        Update population health level, keeping it within 0-100 range.
+        
+        Args:
+            amount: Health change amount (positive or negative)
+        """
         self.population.health_level = max(0.0, min(100.0, self.population.health_level + amount))
 
 class HumanPopulation(BasePopulationProcess):
@@ -40,14 +67,26 @@ class HumanPopulation(BasePopulationProcess):
         self.health_cycle = env.process(self.health_update_process())
 
     async def daily_cycle(self):
+        """
+        Simulates daily human activities including:
+        - Work commuting and associated pollution generation
+        - Resource consumption for daily needs
+        - Environmental impact calculations
+        
+        This cycle runs continuously while the population is active, with each
+        iteration representing one day in the simulation. The pollution generated
+        and resources consumed scale with population size.
+        """
         while self.active:
-            # Daily activities (all happening in one day)
-            # Work and commuting pollution - scales with population size
-            pollution_generated = self.population.pollution_generation_rate * self.population.size * COMMUTE_POLLUTION_MULTIPLIER
+            # Calculate and apply commuting pollution impact
+            pollution_generated = (self.population.pollution_generation_rate * 
+                                 self.population.size * 
+                                 COMMUTE_POLLUTION_MULTIPLIER)
             self.cell.air_pollution_level += pollution_generated  # Pollution goes into the air first
             
-            # Daily resource consumption
-            self.cell.resource_level -= (self.population.resource_consumption_rate * self.population.size)
+            # Calculate and apply daily resource consumption
+            self.cell.resource_level -= (self.population.resource_consumption_rate * 
+                                       self.population.size)
             
             # Wait for next day
             await self.env.timeout(1)  # One step = one day
@@ -60,8 +99,26 @@ class HumanPopulation(BasePopulationProcess):
         self.days_abandoned = 0  # Track how long a city has been below viable population
 
     async def growth_process(self):
+        """
+        Manages population growth and decline based on environmental conditions.
+        
+        This process:
+        1. Evaluates environmental conditions (health and resources)
+        2. Triggers growth when conditions are favorable
+        3. Manages population decline in poor conditions
+        4. Handles city expansion and abandonment
+        5. Runs on a weekly cycle
+        
+        The process implements realistic urban dynamics where:
+        - Cities grow when conditions are good
+        - Population declines in poor conditions
+        - Cities can be abandoned if population drops too low
+        - New cities can form through expansion
+        """
         while self.active:
             current_density = self.population.size
+            
+            # Check environmental conditions for growth/decline
             growth_conditions = (
                 self.cell.health_level > self.config.health_thresholds["good"] and 
                 self.cell.resource_level > self.config.population_growth_decline_thresholds["growth"]
@@ -76,20 +133,21 @@ class HumanPopulation(BasePopulationProcess):
                     # Normal growth within density limits
                     self.population.size = int(self.population.size * HUMAN_GROWTH_RATE)
                 else:
-                    # Try to expand to adjacent land
+                    # Try to expand to adjacent land when at capacity
                     await self.try_expand_city()
             elif decline_conditions:
+                # Apply population decline
                 self.population.size = int(self.population.size * HUMAN_DECLINE_RATE)
                 
-                # Track abandonment
+                # Track potential city abandonment
                 if self.population.size < MAX_HUMAN_DENSITY * 0.1:  # Less than 10% capacity
                     self.days_abandoned += 7
                     if self.days_abandoned >= CITY_ABANDONMENT_DAYS:
-                        self.cell.cell_type = CellType.LAND
+                        self.cell.cell_type = CellType.LAND  # Convert abandoned city to land
                 else:
                     self.days_abandoned = 0
             
-            await self.env.timeout(7)  # Check weekly
+            await self.env.timeout(7)  # Weekly population assessment
 
     async def try_expand_city(self):
         for neighbor in self.cell.neighbors:
