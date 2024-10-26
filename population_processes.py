@@ -1,4 +1,5 @@
 import simpy
+import random
 from typing import List, Dict, Optional
 from cell import Cell, CellType
 from population import Population, PopulationType
