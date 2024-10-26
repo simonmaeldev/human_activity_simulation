@@ -51,13 +51,6 @@ class Environment:
             for y, cell in enumerate(row):
                 cell.current_pollution_level = new_pollution_levels[x][y]
 
-    def manage_cell_type_conversions(self):
-        for row in self.grid:
-            for cell in row:
-                if cell.cell_type == CellType.FOREST and cell.current_pollution_level > self.config.cell_conversion_thresholds["forest_to_land"]:
-                    cell.cell_type = CellType.LAND
-                elif cell.cell_type == CellType.LAND and cell.health_level > self.config.cell_conversion_thresholds["land_to_city"]:
-                    cell.cell_type = CellType.CITY
 
     def track_global_statistics(self):
         total_pollution = sum(cell.current_pollution_level for row in self.grid for cell in row)

@@ -39,9 +39,18 @@ Core Concepts:
 6. Environmental Rules:
 - Resources regenerate based on cell health
 - Populations decline in polluted environments
-- Cells can change type based on conditions
 - Water refills at constant rate
 - Wildlife relocates if habitat destroyed
+- Cell type conversions are agent-driven decisions:
+  * Humans (through city planning) can convert:
+    - Forest to Land (deforestation)
+    - Land to City (urbanization)
+    - Land to Forest (reforestation)
+  * Each conversion action:
+    - Generates CO2 emissions
+    - Creates temporary pollution in surrounding cells
+    - Requires resource investment
+    - Takes time to complete
 
 7. Data Collection:
 - Track all metrics per simulation step
