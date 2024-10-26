@@ -1,0 +1,50 @@
+PROJECT CONTEXT - Human Activity Environmental Simulation
+
+Purpose:
+This project creates an agent-based simulation to model the impact of human activity on the environment. The simulation runs on a grid where each cell represents different types of environment (cities, forests, lakes, lands) and contains populations that interact with resources and generate pollution.
+
+Core Concepts:
+1. Grid Structure:
+- Square grid (configurable size, default 100x100)
+- Each cell has one type: city, forest, lake, or land
+- Cells contain populations and resources
+
+2. Population Types:
+- Humans (in cities)
+- Wildlife (in forests)
+- Fish (in lakes)
+- Pests (in lands)
+- Trees/Plants (in forests)
+
+3. Resources and Health:
+- Each cell and population has health (0-100%)
+- Resources: water, food, clean air
+- Resource quality affected by pollution
+- Consuming polluted resources reduces health
+- Proximity to nature increases health
+
+4. Pollution Mechanics:
+- Global CO2 tracking across entire grid
+- Local pollution in cells
+- Pollution spreads between cells
+- Trees reduce global CO2
+- Natural pollution decay over time
+
+5. Human Activity:
+- Daily cycle: home → work (pollution+CO2) → resource consumption → home (pollution+CO2) → rest
+- Humans have priority in resource consumption
+- Cities expand based on health and resource abundance
+- Can convert forests/lands to cities, forests to lands
+
+6. Environmental Rules:
+- Resources regenerate based on cell health
+- Populations decline in polluted environments
+- Cells can change type based on conditions
+- Water refills at constant rate
+- Wildlife relocates if habitat destroyed
+
+7. Data Collection:
+- Track all metrics per simulation step
+- Export data to CSV files by cell type
+
+The simulation uses SimPy for event handling and Pydantic for data validation and structure.
