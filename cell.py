@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Tuple
+from typing import List, Tuple, TYPE_CHECKING
 from enum import Enum
 
 class CellType(Enum):
@@ -8,7 +8,8 @@ class CellType(Enum):
     LAKE = "lake"
     LAND = "land"
 
-class Cell(BaseModel):
+if TYPE_CHECKING:
+    from population import Population
     position: Tuple[int, int] = Field(description="Position of the cell in the grid as (x, y)")
     cell_type: CellType = Field(description="Type of the cell")
     current_pollution_level: float = Field(default=0.0, description="Current pollution level in the cell")
