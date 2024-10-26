@@ -33,8 +33,9 @@ class HumanPopulation(BasePopulationProcess):
     async def daily_cycle(self):
         while self.active:
             # Daily activities (all happening in one day)
-            # Work and commuting pollution
-            self.cell.current_pollution_level += self.population.pollution_generation_rate * 2  # Two commutes per day
+            # Work and commuting pollution - scales with population size
+            pollution_generated = self.population.pollution_generation_rate * self.population.size * 2  # Two commutes per day
+            self.cell.air_pollution_level += pollution_generated  # Pollution goes into the air first
             
             # Daily resource consumption
             self.cell.resource_level -= (self.population.resource_consumption_rate * self.population.size)
@@ -55,8 +56,8 @@ class HumanPopulation(BasePopulationProcess):
 
     async def health_update_process(self):
         while self.active:
-            # Health impact from polluted resources
-            pollution_impact = -0.1 * self.cell.current_pollution_level
+            # Health impact from both air and ground pollution
+            pollution_impact = -0.15 * self.cell.air_pollution_level - 0.05 * self.cell.ground_pollution_level
             
             # Benefit from nearby nature
             nature_bonus = sum(1 for neighbor in self.cell.neighbors 

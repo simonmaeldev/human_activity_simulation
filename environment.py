@@ -27,31 +27,48 @@ class Environment:
         return neighbors
 
     def calculate_pollution_spread(self):
-        # Create a temporary grid to store new pollution levels
-        new_pollution_levels = [[0.0 for _ in range(len(self.grid[0]))] for _ in range(len(self.grid))]
+        # Create temporary grids for new pollution levels
+        new_air_pollution = [[0.0 for _ in range(len(self.grid[0]))] for _ in range(len(self.grid))]
+        new_ground_pollution = [[0.0 for _ in range(len(self.grid[0]))] for _ in range(len(self.grid))]
+        
+        AIR_SPREAD_RATE = 0.4  # Air pollution spreads faster
+        GROUND_SPREAD_RATE = 0.1  # Ground pollution spreads slower
+        AIR_TO_GROUND_RATE = 0.2  # Rate at which air pollution settles into ground
         
         # Calculate pollution diffusion for each cell
         for x, row in enumerate(self.grid):
             for y, cell in enumerate(row):
                 neighbors = self.get_neighbors(x, y)
-                cell_spread_rate = self.config.pollution_spread_rates[cell.cell_type.value]
+                if not neighbors:
+                    continue
+                    
+                # Air pollution spread
+                air_outflow = cell.air_pollution_level * AIR_SPREAD_RATE
+                air_per_neighbor = air_outflow / len(neighbors)
+                new_air_pollution[x][y] = cell.air_pollution_level - air_outflow
                 
-                # Amount of pollution that will leave this cell
-                total_outflow = cell.current_pollution_level * cell_spread_rate
-                pollution_per_neighbor = total_outflow / len(neighbors) if neighbors else 0
+                # Ground pollution spread
+                ground_outflow = cell.ground_pollution_level * GROUND_SPREAD_RATE
+                ground_per_neighbor = ground_outflow / len(neighbors)
+                new_ground_pollution[x][y] = cell.ground_pollution_level - ground_outflow
                 
-                # Add the remaining pollution (what didn't spread) to the new level
-                new_pollution_levels[x][y] = cell.current_pollution_level - total_outflow
-                
-                # Distribute the outflow to neighbors
+                # Distribute to neighbors
                 for neighbor in neighbors:
                     nx, ny = neighbor.position
-                    new_pollution_levels[nx][ny] += pollution_per_neighbor
+                    new_air_pollution[nx][ny] += air_per_neighbor
+                    new_ground_pollution[nx][ny] += ground_per_neighbor
         
-        # Update the grid with new pollution levels
+        # Update cells and handle air-to-ground settlement
         for x, row in enumerate(self.grid):
             for y, cell in enumerate(row):
-                cell.current_pollution_level = new_pollution_levels[x][y]
+                # Some air pollution settles into the ground
+                air_settling = new_air_pollution[x][y] * AIR_TO_GROUND_RATE
+                new_air_pollution[x][y] -= air_settling
+                new_ground_pollution[x][y] += air_settling
+                
+                # Update cell values
+                cell.air_pollution_level = new_air_pollution[x][y]
+                cell.ground_pollution_level = new_ground_pollution[x][y]
 
 
     def track_global_statistics(self):

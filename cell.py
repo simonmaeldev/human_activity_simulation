@@ -12,7 +12,8 @@ if TYPE_CHECKING:
     from population import Population
     position: Tuple[int, int] = Field(description="Position of the cell in the grid as (x, y)")
     cell_type: CellType = Field(description="Type of the cell")
-    current_pollution_level: float = Field(default=0.0, description="Current pollution level in the cell")
+    air_pollution_level: float = Field(default=0.0, description="Current air pollution level in the cell")
+    ground_pollution_level: float = Field(default=0.0, description="Current ground pollution level in the cell")
     health_level: float = Field(default=100.0, description="Health level of the cell (0-100)")
     populations: List['Population'] = Field(default_factory=list, description="List of populations in the cell")
     resource_level: float = Field(default=0.0, description="Resource level in the cell")
