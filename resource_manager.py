@@ -4,20 +4,42 @@ from config_model import ConfigModel
 from population import Population, PopulationType
 
 class ResourceManager:
+    """
+    Manages all resource-related operations in the simulation including:
+    - Resource consumption with priority system (humans first, then wildlife, etc.)
+    - Resource regeneration based on cell health and pollution
+    - Resource transfer between cells
+    - Resource quality calculations
+    """
     def __init__(self, config: ConfigModel):
         self.config = config
+        # Priority system ensures humans get resources first in times of scarcity
+        # Lower number = higher priority
         self.resource_priorities = {
-            PopulationType.HUMANS: 1,
-            PopulationType.WILDLIFE: 2,
-            PopulationType.FISH: 2,
-            PopulationType.TREES: 3,
-            PopulationType.PESTS: 4
+            PopulationType.HUMANS: 1,    # Humans get first access
+            PopulationType.WILDLIFE: 2,  # Wildlife and fish share second priority
+            PopulationType.FISH: 2,      # Important for ecosystem balance
+            PopulationType.TREES: 3,     # Trees can survive longer without resources
+            PopulationType.PESTS: 4      # Pests get last priority
         }
 
     def consume_resources(self, cell: Cell) -> Dict[Population, float]:
         """
         Handles resource consumption with priority system.
-        Returns dict of {population: amount_consumed}
+        
+        This is a critical function that:
+        1. Sorts populations by priority (humans first)
+        2. Allocates resources based on need and availability
+        3. Ensures higher priority populations get resources first
+        4. Returns exactly how much each population consumed
+        
+        Returns:
+            Dict[Population, float]: Maps each population to amount of resources they received
+        
+        Design choices:
+        - Priority system prevents resource conflicts
+        - Returns consumption data for tracking/statistics
+        - Handles resource scarcity gracefully
         """
         consumption_results = {}
         available_resources = cell.resource_level
