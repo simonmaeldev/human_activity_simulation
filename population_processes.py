@@ -4,6 +4,7 @@ from typing import List, Dict, Optional
 from cell import Cell, CellType
 from population import Population, PopulationType
 from config_model import ConfigModel
+from constants import *
 
 class BasePopulationProcess:
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
@@ -34,7 +35,7 @@ class HumanPopulation(BasePopulationProcess):
         while self.active:
             # Daily activities (all happening in one day)
             # Work and commuting pollution - scales with population size
-            pollution_generated = self.population.pollution_generation_rate * self.population.size * 2  # Two commutes per day
+            pollution_generated = self.population.pollution_generation_rate * self.population.size * COMMUTE_POLLUTION_MULTIPLIER
             self.cell.air_pollution_level += pollution_generated  # Pollution goes into the air first
             
             # Daily resource consumption
@@ -47,21 +48,22 @@ class HumanPopulation(BasePopulationProcess):
         while self.active:
             if (self.cell.health_level > self.config.health_thresholds["good"] and 
                 self.cell.resource_level > self.config.population_growth_decline_thresholds["growth"]):
-                self.population.size = int(self.population.size * 1.1)  # 10% growth
+                self.population.size = int(self.population.size * HUMAN_GROWTH_RATE)
             elif (self.cell.health_level < self.config.health_thresholds["poor"] or 
                   self.cell.resource_level < self.config.population_growth_decline_thresholds["decline"]):
-                self.population.size = int(self.population.size * 0.9)  # 10% decline
+                self.population.size = int(self.population.size * HUMAN_DECLINE_RATE)
             
             await self.env.timeout(7)  # Check weekly (7 days)
 
     async def health_update_process(self):
         while self.active:
             # Health impact from both air and ground pollution
-            pollution_impact = -0.15 * self.cell.air_pollution_level - 0.05 * self.cell.ground_pollution_level
+            pollution_impact = (AIR_POLLUTION_HEALTH_IMPACT * self.cell.air_pollution_level + 
+                              GROUND_POLLUTION_HEALTH_IMPACT * self.cell.ground_pollution_level)
             
             # Benefit from nearby nature
             nature_bonus = sum(1 for neighbor in self.cell.neighbors 
-                             if neighbor.cell_type in [CellType.FOREST, CellType.LAKE]) * 0.05
+                             if neighbor.cell_type in [CellType.FOREST, CellType.LAKE]) * NATURE_PROXIMITY_BONUS
             
             await self.update_health(pollution_impact + nature_bonus)
             await self.env.timeout(1)
@@ -75,7 +77,7 @@ class TreePopulation(BasePopulationProcess):
     async def co2_absorption_process(self):
         while self.active:
             # CO2 absorption rate based on health and pollution
-            absorption_rate = (self.population.size * 0.1 * 
+            absorption_rate = (self.population.size * TREE_CO2_ABSORPTION_FACTOR * 
                              (self.population.health_level / 100) * 
                              (1 - self.cell.current_pollution_level / 100))
             
@@ -86,7 +88,7 @@ class TreePopulation(BasePopulationProcess):
         while self.active:
             if (self.cell.health_level > 70 and 
                 self.cell.resource_level > self.config.resource_regeneration_rates["forest"]):
-                self.population.size = int(self.population.size * 1.05)  # 5% growth
+                self.population.size = int(self.population.size * TREE_GROWTH_RATE)
                 
                 # Potential spread to adjacent cells
                 for neighbor in self.cell.neighbors:
@@ -94,7 +96,7 @@ class TreePopulation(BasePopulationProcess):
                         neighbor.health_level > 80 and 
                         neighbor.resource_level > self.config.resource_regeneration_rates["forest"]):
                         # Chance to convert to forest
-                        if random.random() < 0.1:  # 10% chance
+                        if random.random() < FOREST_SPREAD_CHANCE:
                             neighbor.cell_type = CellType.FOREST
             
             await self.env.timeout(24 * 30)  # Monthly growth check
@@ -113,7 +115,7 @@ class WildlifePopulation(BasePopulationProcess):
             
             # Health impact based on resource quality
             quality_factor = 1 - (self.cell.current_pollution_level / 100)
-            await self.update_health((consumed / self.population.size) * quality_factor - 0.1)
+            await self.update_health((consumed / self.population.size) * quality_factor - WILDLIFE_BASE_HEALTH_DECLINE)
             
             await self.env.timeout(1)
 

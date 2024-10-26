@@ -4,6 +4,7 @@ from typing import List, Tuple
 from cell import Cell, CellType
 from config_model import ConfigModel
 from population_processes import PopulationManager
+from constants import *
 
 class Environment:
     def __init__(self, config: ConfigModel):
@@ -30,10 +31,6 @@ class Environment:
         # Create temporary grids for new pollution levels
         new_air_pollution = [[0.0 for _ in range(len(self.grid[0]))] for _ in range(len(self.grid))]
         new_ground_pollution = [[0.0 for _ in range(len(self.grid[0]))] for _ in range(len(self.grid))]
-        
-        AIR_SPREAD_RATE = 0.4  # Air pollution spreads faster
-        GROUND_SPREAD_RATE = 0.1  # Ground pollution spreads slower
-        AIR_TO_GROUND_RATE = 0.2  # Rate at which air pollution settles into ground
         
         # Calculate pollution diffusion for each cell
         for x, row in enumerate(self.grid):
