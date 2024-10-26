@@ -25,12 +25,31 @@ class Environment:
         return neighbors
 
     def calculate_pollution_spread(self):
-        for row in self.grid:
-            for cell in row:
-                neighbors = self.get_neighbors(*cell.position)
+        # Create a temporary grid to store new pollution levels
+        new_pollution_levels = [[0.0 for _ in range(len(self.grid[0]))] for _ in range(len(self.grid))]
+        
+        # Calculate pollution diffusion for each cell
+        for x, row in enumerate(self.grid):
+            for y, cell in enumerate(row):
+                neighbors = self.get_neighbors(x, y)
+                cell_spread_rate = self.config.pollution_spread_rates[cell.cell_type.value]
+                
+                # Amount of pollution that will leave this cell
+                total_outflow = cell.current_pollution_level * cell_spread_rate
+                pollution_per_neighbor = total_outflow / len(neighbors) if neighbors else 0
+                
+                # Add the remaining pollution (what didn't spread) to the new level
+                new_pollution_levels[x][y] = cell.current_pollution_level - total_outflow
+                
+                # Distribute the outflow to neighbors
                 for neighbor in neighbors:
-                    spread_rate = self.config.pollution_spread_rates[cell.cell_type.value]
-                    neighbor.current_pollution_level += cell.current_pollution_level * spread_rate
+                    nx, ny = neighbor.position
+                    new_pollution_levels[nx][ny] += pollution_per_neighbor
+        
+        # Update the grid with new pollution levels
+        for x, row in enumerate(self.grid):
+            for y, cell in enumerate(row):
+                cell.current_pollution_level = new_pollution_levels[x][y]
 
     def manage_cell_type_conversions(self):
         for row in self.grid:
