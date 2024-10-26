@@ -4,7 +4,10 @@ from typing import List, Tuple
 from cell import Cell, CellType
 from config_model import ConfigModel
 from population_processes import PopulationManager
-from constants import *
+from constants import (
+    AIR_SPREAD_RATE, GROUND_SPREAD_RATE,
+    AIR_TO_GROUND_RATE
+)
 
 class Environment:
     def __init__(self, config: ConfigModel):

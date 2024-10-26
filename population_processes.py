@@ -4,7 +4,13 @@ from typing import List, Dict, Optional
 from cell import Cell, CellType
 from population import Population, PopulationType
 from config_model import ConfigModel
-from constants import *
+from constants import (
+    HUMAN_GROWTH_RATE, HUMAN_DECLINE_RATE,
+    AIR_POLLUTION_HEALTH_IMPACT, GROUND_POLLUTION_HEALTH_IMPACT,
+    NATURE_PROXIMITY_BONUS, WILDLIFE_BASE_HEALTH_DECLINE,
+    TREE_CO2_ABSORPTION_FACTOR, TREE_GROWTH_RATE,
+    FOREST_SPREAD_CHANCE, COMMUTE_POLLUTION_MULTIPLIER
+)
 
 class BasePopulationProcess:
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
