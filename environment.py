@@ -3,6 +3,7 @@ import random
 from typing import List, Tuple
 from cell import Cell, CellType
 from config_model import ConfigModel
+from population_processes import PopulationManager
 
 class Environment:
     def __init__(self, config: ConfigModel):
@@ -10,6 +11,7 @@ class Environment:
         self.grid = self._initialize_grid(config.grid_size)
         self.global_co2_level = config.initial_co2_level
         self.config = config
+        self.population_manager = PopulationManager(self.env, config)
 
     def _initialize_grid(self, grid_size: Tuple[int, int]) -> List[List[Cell]]:
         return [[Cell(position=(x, y), cell_type=random.choice(list(CellType))) 
