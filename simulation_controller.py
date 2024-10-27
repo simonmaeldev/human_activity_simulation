@@ -73,7 +73,7 @@ class SimulationController:
         """
         logging.info("Initializing simulation...")
 
-    def run(self, duration: int) -> Dict[str, Any]:
+    async def run(self, duration: int) -> Dict[str, Any]:
         """
         Run the simulation for specified duration.
         

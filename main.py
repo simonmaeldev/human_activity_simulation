@@ -2,6 +2,7 @@ from config_model import ConfigModel
 from simulation_controller import SimulationController
 import logging
 import traceback
+import asyncio
 
 def main():
     # Create simulation configuration with fixed seed for reproducibility
@@ -12,7 +13,7 @@ def main():
     
     try:
         # Run simulation for 365 days
-        results = controller.run(duration=100)
+        results = asyncio.run(controller.run(duration=100))
         
         # Print summary statistics
         logging.info("Simulation Results:")
