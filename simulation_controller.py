@@ -29,7 +29,8 @@ class SimulationController:
         config.simulation_dir = f"simulation_data/{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.config = config
         
-        # Initialize environment first to get access to grid
+        # Initialize environment first to get access to grid and env
+        self.environment = Environment(config)
         self.env = self.environment.env
         self.grid = self.environment.grid
         
@@ -45,8 +46,6 @@ class SimulationController:
         self.population_manager = PopulationManager(self.env, config)
         
         self.data_collector = DataCollector()
-        
-        self.environment = Environment(config)
         self.start_time = datetime.now()
         self.end_time: Optional[datetime] = None
         
