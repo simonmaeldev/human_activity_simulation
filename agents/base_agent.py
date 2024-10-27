@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
 from cell import Cell, CellType
 from population import Population, PopulationType
+from config_model import ConfigModel
 
 class BaseAgent(ABC):
     """
