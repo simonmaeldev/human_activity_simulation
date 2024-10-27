@@ -3,6 +3,7 @@ import logging
 from typing import Optional, Dict, Any
 from datetime import datetime
 from pathlib import Path
+import os
 
 from environment import Environment
 from config_model import ConfigModel
@@ -31,7 +32,7 @@ class SimulationController:
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.FileHandler('simulation.log'),
+                logging.FileHandler(os.path.join(self.log_dir, 'simulation.log')),
                 logging.StreamHandler()
             ]
         )
@@ -43,10 +44,13 @@ class SimulationController:
         """
         # Create output directories
         Path("simulation_data").mkdir(exist_ok=True)
-        Path("logs").mkdir(exist_ok=True)
+        
+        # Create timestamped logs directory
+        self.start_time = datetime.now()
+        self.log_dir = f"logs_{self.start_time.strftime('%Y%m%d_%H%M%S')}"
+        Path(self.log_dir).mkdir(exist_ok=True)
         
         logging.info("Initializing simulation...")
-        self.start_time = datetime.now()
 
     def run(self, duration: int) -> Dict[str, Any]:
         """
