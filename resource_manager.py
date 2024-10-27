@@ -13,6 +13,22 @@ class ResourceManager:
     - Resource quality calculations
     - Water flow between connected lakes
     - Irrigation effects on pollution
+    
+    Design Pattern: Manager/Service Pattern
+    This class uses the Manager pattern instead of putting resource logic in Cell classes because:
+    1. System-wide Policies: Manages global resource priorities across all cells
+    2. Cross-Cell Interactions: Handles resource transfers and water flow between multiple cells
+    3. Consistency: Ensures uniform resource rules across the simulation
+    4. Single Responsibility: Separates resource logic from cell state management
+    5. Easier Updates: Changes to resource rules only need to be made in one place
+    
+    Example: When a human population needs resources, instead of:
+        cell.consume_resources(population)  # OOP way
+    We use:
+        resource_manager.consume_resources(cell)  # Manager pattern
+    
+    This allows the manager to enforce priorities and handle complex interactions
+    between different populations and cell types consistently.
     """
     def __init__(self, config: ConfigModel):
         self.config = config
@@ -28,7 +44,17 @@ class ResourceManager:
         }
 
     def consume_resources(self, cell: Cell) -> Dict[Population, float]:
-        """Handle resource consumption with priority system"""
+        """
+        Handle resource consumption with priority system
+        
+        This method demonstrates why we use a manager:
+        1. Priority System: Controls which populations get resources first
+        2. Cross-Population Logic: Manages resource distribution across different types
+        3. Pollution Transfer: Handles complex interactions between resources and pollution
+        
+        If this was in Cell class, each cell would need to implement its own
+        priority system, leading to potential inconsistencies.
+        """
         consumption_results = {}
         available_resources = cell.resource_level
         
@@ -56,7 +82,17 @@ class ResourceManager:
         return consumption_results
 
     def regenerate_resources(self, cell: Cell):
-        """Handle resource regeneration based on cell type"""
+        """
+        Handle resource regeneration based on cell type
+        
+        Manager Pattern Benefits Here:
+        1. Different cell types (LAKE, LAND, FOREST) have different regeneration rules
+        2. Centralized configuration of regeneration rates
+        3. Consistent handling of health factors across all types
+        4. Complex irrigation logic involving multiple cells
+        
+        This would be harder to maintain if split across different Cell subclasses.
+        """
         if cell.cell_type == CellType.LAKE:
             self._regenerate_lake_resources(cell)
         elif cell.cell_type == CellType.LAND:
@@ -128,15 +164,19 @@ class ResourceManager:
         """
         Transfers resources between cells safely.
         
-        This critical function:
-        1. Ensures we never transfer more than available
-        2. Maintains conservation of resources
-        3. Returns actual amount transferred for tracking
+        Perfect example of why we use a Manager:
+        1. Atomic Operations: Updates both cells in one transaction
+        2. Resource Conservation: Ensures resources aren't created/lost
+        3. Validation: Checks transfer amounts centrally
+        4. Tracking: Returns actual transfer amount for verification
         
-        Design choices:
-        - Uses min() to prevent negative resources
-        - Atomic operation (both cells updated together)
-        - Returns transfer amount for verification
+        If this was in Cell class:
+            source_cell.transfer_to(target_cell, amount)
+        It would be harder to:
+        - Ensure atomicity
+        - Prevent cells from creating resources
+        - Track transfers system-wide
+        - Maintain consistent transfer rules
         
         Args:
             source: Cell giving resources
