@@ -1,6 +1,6 @@
 import simpy
 import random
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from cell import Cell, CellType
 from config_model import ConfigModel
 from population_processes import PopulationManager
