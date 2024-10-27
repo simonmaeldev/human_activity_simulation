@@ -23,10 +23,10 @@ class CSVExporter:
             os.makedirs(self.output_dir)
 
     def _get_filename(self, prefix: str) -> str:
-        """Generate filename with timestamp"""
+        """Generate filename"""
         return os.path.join(
             self.output_dir,
-            f"{prefix}_{self.timestamp}.csv"
+            f"{prefix}.csv"
         )
 
     def export_global_metrics(self, data_collector: DataCollector) -> str:
