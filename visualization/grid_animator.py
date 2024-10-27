@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import LinearSegmentedColormap
 
@@ -90,21 +91,27 @@ class GridAnimator:
         n_bins = 4
         cmap = LinearSegmentedColormap.from_list('custom', colors, N=n_bins)
         
+        progress_bar = tqdm(total=len(self.timesteps), desc="Creating grid animation")
+        
         def update(frame):
             ax.clear()
             grid = self._create_grid_frame(self.timesteps[frame])
             im = ax.imshow(grid, cmap=cmap, interpolation='nearest')
             ax.set_title(f'Simulation Step: {self.timesteps[frame]}')
+            progress_bar.update(1)
             return [im]
             
         anim = FuncAnimation(fig, update, frames=len(self.timesteps),
                            interval=100, blit=True)
+        progress_bar.close()
         anim.save(output_file)
         plt.close()
         
     def animate_pollution(self, output_file: str = 'pollution_animation.mp4'):
         """Create animation of pollution levels"""
         fig, ax = plt.subplots(figsize=(10, 10))
+        
+        progress_bar = tqdm(total=len(self.timesteps), desc="Creating pollution animation")
         
         def update(frame):
             ax.clear()
@@ -124,9 +131,11 @@ class GridAnimator:
             pollution_cmap = LinearSegmentedColormap.from_list('pollution', ['white', 'black'])
             im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest', vmin=0, vmax=100)
             plt.colorbar(im, ax=ax, label='Air Pollution Level (%)')
+            progress_bar.update(1)
             return [im]
             
         anim = FuncAnimation(fig, update, frames=len(self.timesteps),
                            interval=100, blit=True)
+        progress_bar.close()
         anim.save(output_file)
         plt.close()
