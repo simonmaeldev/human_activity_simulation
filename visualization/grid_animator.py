@@ -27,7 +27,11 @@ class GridAnimator:
         for cell_type in ['city', 'forest', 'lake', 'land']:
             file_path = os.path.join(self.data_dir, f'cell_data_{cell_type}.csv')
             if os.path.exists(file_path):
-                self.cell_data[cell_type] = pd.read_csv(file_path)
+                df = pd.read_csv(file_path)
+                if not df.empty:
+                    # Pre-process position data to avoid eval() calls later
+                    df['position'] = df['position'].apply(eval)
+                self.cell_data[cell_type] = df
                 
         # Load global metrics
         global_metrics_path = os.path.join(self.data_dir, 'global_metrics.csv')
@@ -38,8 +42,7 @@ class GridAnimator:
         all_positions = []
         for df in self.cell_data.values():
             if not df.empty:
-                positions = df['position'].apply(eval)  # Convert string tuples to actual tuples
-                all_positions.extend(positions.tolist())
+                all_positions.extend(df['position'].tolist())
         
         if all_positions:
             x_coords, y_coords = zip(*all_positions)
@@ -59,8 +62,8 @@ class GridAnimator:
         
         for cell_type, df in self.cell_data.items():
             step_data = df[df['step'] == step]
-            for _, row in step_data.iterrows():
-                pos = eval(row['position'])
+            positions = step_data['position'].values
+            for pos in positions:
                 grid[pos[0]][pos[1]] = color_values[cell_type]
                 
         return grid
@@ -71,9 +74,10 @@ class GridAnimator:
         
         for cell_type, df in self.cell_data.items():
             step_data = df[df['step'] == step]
-            for _, row in step_data.iterrows():
-                pos = eval(row['position'])
-                pollution_grid[pos[0]][pos[1]] = row['air_pollution']
+            positions = step_data['position'].values
+            pollution_values = step_data['air_pollution'].values
+            for pos, value in zip(positions, pollution_values):
+                pollution_grid[pos[0]][pos[1]] = value
                 
         return pollution_grid
         
