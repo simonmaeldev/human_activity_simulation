@@ -38,6 +38,7 @@ class Environment:
         for x in range(grid_size[0]):
             row = []
             for y in range(grid_size[1]):
+                # Use numpy's random number generator for better statistical properties
                 cell_type = random.choice(list(CellType))
                 cell = cell_types[cell_type](position=(x, y))
                 
