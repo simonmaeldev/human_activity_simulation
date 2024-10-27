@@ -346,6 +346,7 @@ class PopulationManager:
         self.config = config
         self.populations: Dict[Cell, List[BasePopulationProcess]] = {}
         self.agents: Dict[Population, BaseAgent] = {}
+        self.resource_manager = None  # Will be set by SimulationController
 
     def update_populations(self, grid: List[List[Cell]]):
         """Update all populations across the grid"""
@@ -364,7 +365,8 @@ class PopulationManager:
                         process.process = self.env.process(process.run())
             
             # Resource consumption for all populations
-            self.config.resource_manager.consume_resources(cell)
+            if self.resource_manager:
+                self.resource_manager.consume_resources(cell)
 
     def add_population(self, population: Population, cell: Cell):
         if cell not in self.populations:

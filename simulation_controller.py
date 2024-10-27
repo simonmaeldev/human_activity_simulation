@@ -39,11 +39,9 @@ class SimulationController:
         self.pollution_manager = PollutionManager(config)
         self.water_system = WaterSystem()
         
-        # Connect resource manager to config for other components to access
-        self.config.resource_manager = self.resource_manager
-        
         # Initialize population manager last so it has access to other systems
         self.population_manager = PopulationManager(self.env, config)
+        self.population_manager.resource_manager = self.resource_manager
         
         self.data_collector = DataCollector()
         self.start_time = datetime.now()
