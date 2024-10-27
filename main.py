@@ -1,6 +1,7 @@
 from config_model import ConfigModel
 from simulation_controller import SimulationController
 import logging
+import traceback
 
 def main():
     # Create simulation configuration
