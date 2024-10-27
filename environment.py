@@ -21,9 +21,17 @@ class Environment:
         self.csv_exporter = CSVExporter()
 
     def _initialize_grid(self, grid_size: Tuple[int, int]) -> List[List[Cell]]:
-        return [[Cell(position=(x, y), cell_type=random.choice(list(CellType))) 
-                for y in range(grid_size[1])] 
-                for x in range(grid_size[0])]
+        cell_types = {
+            CellType.CITY: CityCell,
+            CellType.FOREST: ForestCell,
+            CellType.LAKE: LakeCell,
+            CellType.LAND: LandCell
+        }
+        
+        return [[
+            cell_types[random.choice(list(CellType))](position=(x, y))
+            for y in range(grid_size[1])
+        ] for x in range(grid_size[0])]
 
     def get_neighbors(self, x: int, y: int) -> List[Cell]:
         neighbors = []
