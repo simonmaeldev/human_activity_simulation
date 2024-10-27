@@ -93,7 +93,7 @@ class SimulationController:
             # Run for specified duration
             for day in range(duration):
                 # Update environment state
-                self.update_environment()
+                self.environment.update_environment()
                 
                 # Process SimPy events for one day
                 self.environment.env.run(until=day + 1)
