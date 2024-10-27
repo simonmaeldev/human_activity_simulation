@@ -1,11 +1,13 @@
 import simpy
 import random
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from cell import Cell, CellType
 from config_model import ConfigModel
 from population_processes import PopulationManager
 from resource_manager import ResourceManager
 from pollution_manager import PollutionManager
+from data_collection.data_collector import DataCollector
+from data_collection.csv_exporter import CSVExporter
 
 class Environment:
     def __init__(self, config: ConfigModel):
@@ -15,6 +17,8 @@ class Environment:
         self.population_manager = PopulationManager(self.env, config)
         self.resource_manager = ResourceManager(config)
         self.pollution_manager = PollutionManager(config)
+        self.data_collector = DataCollector()
+        self.csv_exporter = CSVExporter()
 
     def _initialize_grid(self, grid_size: Tuple[int, int]) -> List[List[Cell]]:
         return [[Cell(position=(x, y), cell_type=random.choice(list(CellType))) 
@@ -38,12 +42,16 @@ class Environment:
         for row in self.grid:
             for cell in row:
                 self.resource_manager.regenerate_resources(cell)
+        
+        # Collect data
+        self.data_collector.collect_global_metrics(self)
+        for row in self.grid:
+            for cell in row:
+                self.data_collector.collect_cell_data(cell)
+                for population in cell.populations:
+                    self.data_collector.collect_population_metrics(population, cell)
 
 
-    def track_global_statistics(self):
-        total_pollution = sum(cell.current_pollution_level for row in self.grid for cell in row)
-        total_health = sum(cell.health_level for row in self.grid for cell in row)
-        return {
-            "total_pollution": total_pollution,
-            "average_health": total_health / (len(self.grid) * len(self.grid[0]))
-        }
+    def export_simulation_data(self) -> Dict[str, str]:
+        """Export all collected data to CSV files"""
+        return self.csv_exporter.export_all(self.data_collector)
