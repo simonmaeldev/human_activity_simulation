@@ -20,14 +20,20 @@ class SimulationController:
         Args:
             config: Configuration parameters for the simulation
         """
+        # Set simulation directory in config
+        config.simulation_dir = f"simulation_data/{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.config = config
         self.environment = Environment(config)
-        self.start_time: Optional[datetime] = None
-        self.end_time: Optional[datetime] = None
-        # Create timestamped logs directory
         self.start_time = datetime.now()
-        self.log_dir = f"logs_{self.start_time.strftime('%Y%m%d_%H%M%S')}"
-        Path(self.log_dir).mkdir(exist_ok=True)
+        self.end_time: Optional[datetime] = None
+        
+        # Create timestamped directories
+        timestamp = self.start_time.strftime('%Y%m%d_%H%M%S')
+        self.log_dir = f"logs/{timestamp}"
+        self.simulation_dir = f"simulation_data/{timestamp}"
+        Path(self.log_dir).mkdir(parents=True, exist_ok=True)
+        Path(self.simulation_dir).mkdir(parents=True, exist_ok=True)
+        
         self._setup_logging()
 
     def _setup_logging(self) -> None:
@@ -44,10 +50,8 @@ class SimulationController:
     def initialize_simulation(self) -> None:
         """
         Set up initial simulation state.
-        Creates output directories and initializes components.
+        Initializes simulation components.
         """
-        # Create output directories
-        Path("simulation_data").mkdir(exist_ok=True)
         logging.info("Initializing simulation...")
 
     def run(self, duration: int) -> Dict[str, Any]:

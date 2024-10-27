@@ -12,7 +12,7 @@ class CSVExporter:
     Creates separate files for each cell type, global metrics,
     and population statistics.
     """
-    def __init__(self, output_dir: str = "simulation_data"):
+    def __init__(self, output_dir: Optional[str] = None):
         self.output_dir = output_dir
         self._ensure_output_dir()
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

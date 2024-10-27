@@ -18,7 +18,7 @@ class Environment:
         self.resource_manager = ResourceManager(config, self.grid)
         self.pollution_manager = PollutionManager(config)
         self.data_collector = DataCollector()
-        self.csv_exporter = CSVExporter()
+        self.csv_exporter = CSVExporter(config.simulation_dir if hasattr(config, 'simulation_dir') else None)
 
     def _initialize_grid(self, grid_size: Tuple[int, int]) -> List[List[Cell]]:
         # Use config's random seed if provided
