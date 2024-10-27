@@ -1,65 +1,77 @@
-PROJECT CONTEXT - Human Activity Environmental Simulation
+PROJECT CONTEXT - Agent-Based Environmental Simulation
 
 Purpose:
-This project creates an agent-based simulation to model the impact of human activity on the environment. The simulation runs on a grid where each cell represents different types of environment (cities, forests, lakes, lands) and contains populations that interact with resources and generate pollution.
+This project creates an agent-based simulation where different populations act as autonomous agents, making decisions to survive, grow, and expand within their environment. The simulation models how these agent decisions and interactions lead to emergent environmental patterns and changes over time.
 
 Core Concepts:
-1. Grid Structure:
-- Square grid (configurable size, default 100x100)
-- Each cell has one type: city, forest, lake, or land
-- Cells contain populations and resources
+1. Agent Types and Goals:
+Each population type is an autonomous agent with primary objectives:
+- Survival (maintain health)
+- Growth (increase population size)
+- Expansion (spread to new cells)
 
-2. Population Types:
-- Humans (in cities)
-- Wildlife (in forests)
-- Fish (in lakes)
-- Pests (in lands)
-- Trees/Plants (in forests)
+2. Population Agents:
+Humans:
+- Can actively modify environment (convert cells)
+- Make decisions about resource consumption
+- Expand cities when population grows
+- Generate pollution through activities
+- Migration based on resource quality and cell health
 
-3. Resource System:
-Lakes:
-- Natural water regeneration at constant rate
-- Water level shared between connected lake cells
-- Supports aquatic life (fish populations)
-- Pollution levels shared between connected lake cells
+Wildlife:
+- Migrate based on resource availability and cell health
+- Make resource consumption choices
+- Cannot modify environment
+- Health affected by pollution and resource quality
 
-Lands:
-- Produces food
-- Requires water for irrigation
-- Absorbs some water pollution during irrigation
-- Food consumed by humans and pests
+Trees/Forests:
+- Natural expansion to abandoned areas
+- Spread rate affected by nearby forest health
+- Passive conversion of abandoned cells
+- CO2 absorption based on health
 
-Forests:
-- Produces trees as resource
-- Contains wildlife populations
-- Consumes water
-- Wildlife consumes small amounts of trees and water
+3. Agent Decision Making:
+Resource Consumption:
+- Agents choose resource sources based on:
+  * Resource quality (pollution levels)
+  * Distance to resource
+  * Available quantity
+  * Competition with other agents
 
-Cities:
-- Consume water for human population
-- Consume food from lands
-- Produce CO2 and pollution based solely on population
-- Pollution production not affected by existing pollution
+Migration:
+- Populations can migrate to nearby cells
+- Success rate depends on:
+  * Distance (further = lower success)
+  * Population health (healthier = higher success)
+  * Target cell capacity and conditions
 
-4. Resource Interactions:
-- Water flows between connected lake cells
-- Irrigation of lands helps clean water pollution
-- Forest water consumption affects local water availability
-- Human consumption prioritized over other uses
+Cell Conversion:
+- Humans can convert cells for their needs:
+  * Forest/Land → Agricultural Land (for food)
+  * Land → City (for population growth)
+  * Conversion produces pollution/CO2
+- Forests naturally reclaim abandoned areas:
+  * Conversion speed based on nearby forest health
+  * Requires sustained abandonment period
 
-5. Pollution System:
-- Cities generate air pollution based on population size
-- Air pollution spreads quickly between cells
-- Air pollution gradually settles into ground/water pollution
-- When resources are consumed, pollution is transferred proportionally:
-  * Example: If a lake is 50% polluted and 30% of water is used,
-    15% of total pollution is removed with the water
-  * Pollution concentration remains constant unless treated
-- Only plants can reduce pollution concentration through absorption
-- Cities' pollution generation is based solely on population size
+4. Environmental Feedback:
+- Resource depletion affects agent health
+- Pollution impacts migration decisions
+- Cell conversions affect resource availability
+- Population density influences expansion choices
+
+5. Emergent Behaviors:
+- Urban sprawl from population growth
+- Natural reforestation of abandoned areas
+- Wildlife migration patterns
+- Resource competition between populations
+- Pollution hotspots and clean zones
 
 6. Data Collection:
-- Track all metrics daily
-- Export data to CSV files by cell type
+- Track agent decisions and outcomes
+- Monitor population movements
+- Record cell conversions
+- Measure environmental changes
+- Export data for analysis
 
-The simulation uses SimPy for event handling and Pydantic for data validation and structure. Each step in the simulation represents one day, allowing for realistic modeling of environmental changes over time.
+The simulation uses SimPy for event handling and Pydantic for data validation. Each agent makes autonomous decisions daily, creating complex system behaviors through their interactions and environmental impacts.
