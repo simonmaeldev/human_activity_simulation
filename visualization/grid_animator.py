@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, FFMpegWriter
 from matplotlib.colors import LinearSegmentedColormap
 
 class GridAnimator:
@@ -91,20 +91,29 @@ class GridAnimator:
         n_bins = 4
         cmap = LinearSegmentedColormap.from_list('custom', colors, N=n_bins)
         
-        progress_bar = tqdm(total=len(self.timesteps), desc="Creating grid animation")
+        # Initial plot
+        grid = self._create_grid_frame(self.timesteps[0])
+        im = ax.imshow(grid, cmap=cmap, interpolation='nearest')
         
         def update(frame):
             ax.clear()
             grid = self._create_grid_frame(self.timesteps[frame])
             im = ax.imshow(grid, cmap=cmap, interpolation='nearest')
             ax.set_title(f'Simulation Step: {self.timesteps[frame]}')
-            progress_bar.update()
             return [im]
             
         anim = FuncAnimation(fig, update, frames=len(self.timesteps),
                            interval=100, blit=True)
+                           
+        # Set up progress bar and writer
+        writer = FFMpegWriter(fps=10)
+        progress_bar = tqdm(total=len(self.timesteps), desc="Creating grid animation", unit='frames')
+        
+        def progress_callback(current_frame, total_frames):
+            progress_bar.update(1)
+            
+        anim.save(output_file, writer=writer, progress_callback=progress_callback)
         progress_bar.close()
-        anim.save(output_file)
         plt.close()
         
     def animate_pollution(self, output_file: str = 'pollution_animation.mp4'):
@@ -114,7 +123,10 @@ class GridAnimator:
         # Create custom colormap from white to black for pollution
         pollution_cmap = LinearSegmentedColormap.from_list('pollution', ['white', 'black'])
         
-        progress_bar = tqdm(total=len(self.timesteps), desc="Creating pollution animation")
+        # Initial plot
+        pollution_grid = self._create_pollution_frame(self.timesteps[0])
+        im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest', vmin=0, vmax=100)
+        plt.colorbar(im, ax=ax, label='Air Pollution Level (%)')
         
         def update(frame):
             ax.clear()
@@ -122,11 +134,18 @@ class GridAnimator:
             im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest', vmin=0, vmax=100)
             ax.set_title(f'Simulation Step: {self.timesteps[frame]}')
             plt.colorbar(im, ax=ax, label='Air Pollution Level (%)')
-            progress_bar.update()
             return [im]
             
         anim = FuncAnimation(fig, update, frames=len(self.timesteps),
                            interval=100, blit=True)
+                           
+        # Set up progress bar and writer
+        writer = FFMpegWriter(fps=10)
+        progress_bar = tqdm(total=len(self.timesteps), desc="Creating pollution animation", unit='frames')
+        
+        def progress_callback(current_frame, total_frames):
+            progress_bar.update(1)
+            
+        anim.save(output_file, writer=writer, progress_callback=progress_callback)
         progress_bar.close()
-        anim.save(output_file)
         plt.close()
