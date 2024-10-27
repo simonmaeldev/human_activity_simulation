@@ -300,24 +300,11 @@ class TreePopulation(BasePopulationProcess):
 class WildlifePopulation(BasePopulationProcess):
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
         super().__init__(env, population, cell, config)
-        self.consumption_process = env.process(self.resource_consumption_process())
-        self.relocation_process = env.process(self.relocation_check_process())
-        self.colonization_process = env.process(self.colonization_process())
+        self.process = env.process(self.run())
 
-    async def resource_consumption_process(self):
+    def resource_consumption_process(self):
         """
         Manages wildlife resource consumption and related health impacts.
-        
-        This process:
-        1. Calculates and consumes resources based on population size
-        2. Adjusts health based on resource quality and pollution
-        3. Applies base health decline to model natural attrition
-        4. Runs daily to simulate continuous resource needs
-        
-        The process models realistic wildlife behavior where:
-        - Resource consumption is limited by availability
-        - Polluted resources negatively impact health
-        - Population naturally declines without sufficient resources
         """
         while self.active:
             # Calculate and apply resource consumption
@@ -327,24 +314,13 @@ class WildlifePopulation(BasePopulationProcess):
             
             # Calculate health impact based on resource quality
             quality_factor = 1 - (self.cell.current_pollution_level / 100)
-            await self.update_health((consumed / self.population.size) * quality_factor - WILDLIFE_BASE_HEALTH_DECLINE)
+            self.update_health((consumed / self.population.size) * quality_factor - WILDLIFE_BASE_HEALTH_DECLINE)
             
-            await self.env.timeout(1)  # Daily consumption cycle
+            yield self.env.timeout(1)  # Daily consumption cycle
 
-    async def relocation_check_process(self):
+    def relocation_check_process(self):
         """
         Manages wildlife population movement and survival based on environmental conditions.
-        
-        This process:
-        1. Monitors cell health conditions
-        2. Triggers wildlife relocation when conditions become critical
-        3. Reduces population if no suitable habitat is found
-        4. Can lead to local extinction if conditions remain poor
-        
-        The process models realistic wildlife behavior where:
-        - Animals attempt to relocate when habitat becomes unhealthy
-        - Population declines if unable to find suitable new habitat
-        - Complete population loss can occur in sustained poor conditions
         """
         while self.active:
             if self.cell.health_level < self.config.health_thresholds["critical"]:
@@ -364,7 +340,7 @@ class WildlifePopulation(BasePopulationProcess):
                     if self.population.size <= 0:
                         self.stop()  # Population extinction
             
-            await self.env.timeout(24)  # Daily habitat assessment
+            yield self.env.timeout(24)  # Daily habitat assessment
 
     def find_suitable_cell(self) -> Optional[Cell]:
         """Find suitable cells for wildlife within movement radius"""
@@ -398,7 +374,7 @@ class WildlifePopulation(BasePopulationProcess):
         """Calculate Manhattan distance between two positions"""
         return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
-    async def colonization_process(self):
+    def colonization_process(self):
         """
         Manages wildlife colonization of new territories.
         
@@ -452,6 +428,15 @@ class WildlifePopulation(BasePopulationProcess):
                         )
             
             yield self.env.timeout(30)  # Monthly colonization attempts
+            
+    def run(self):
+        """Main process that starts all sub-processes"""
+        while self.active:
+            # Start all processes
+            self.env.process(self.resource_consumption_process())
+            self.env.process(self.relocation_check_process())
+            self.env.process(self.colonization_process())
+            yield self.env.timeout(1)
 
 from agents.human_agent import HumanAgent
 from agents.tree_agent import TreeAgent
