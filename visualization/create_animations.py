@@ -2,12 +2,11 @@ import sys
 from grid_animator import GridAnimator
 
 def main():
-#    if len(sys.argv) != 2:
-#        print("Usage: python create_animations.py <simulation_data_directory>")
-#        return 1
+    if len(sys.argv) != 2:
+        print("Usage: python create_animations.py <simulation_data_directory>")
+        return 1
         
-#    data_dir = sys.argv[1]
-    data_dir = "simulation_data/example"
+    data_dir = sys.argv[1]
 
     try:
         animator = GridAnimator(data_dir)
