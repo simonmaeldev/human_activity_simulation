@@ -57,12 +57,13 @@ class Environment:
                 self.resource_manager.regenerate_resources(cell)
         
         # Collect data
+        current_step = self.env.now
         self.data_collector.collect_global_metrics(self)
         for row in self.grid:
             for cell in row:
-                self.data_collector.collect_cell_data(cell)
+                self.data_collector.collect_cell_data(cell, current_step)
                 for population in cell.populations:
-                    self.data_collector.collect_population_metrics(population, cell)
+                    self.data_collector.collect_population_metrics(population, cell, current_step)
 
 
     def export_simulation_data(self) -> Dict[str, str]:
