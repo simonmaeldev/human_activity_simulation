@@ -351,7 +351,7 @@ class PopulationManager:
         self.agents: Dict[Population, BaseAgent] = {}
         self.resource_manager = None  # Will be set by SimulationController
 
-    def update_populations(self, grid: List[List[Cell]]):
+    async def update_populations(self, grid: List[List[Cell]]):
         """Update all populations across the grid"""
         for cell in [cell for row in grid for cell in row]:
             # Create processes for new populations if needed
@@ -365,7 +365,7 @@ class PopulationManager:
                     # Ensure process is active
                     if not process.active:
                         process.active = True
-                        process.process = self.env.process(process.run())
+                        process.process = self.env.process(await process.run())
             
             # Resource consumption for all populations
             if self.resource_manager:

@@ -105,14 +105,14 @@ class Environment:
                 neighbors.append(self.grid[nx][ny])
         return neighbors
 
-    def update_populations(self):
+    async def update_populations(self):
         """
         Update all population activities:
         - Daily cycles (work, resource consumption)
         - Growth and decline
         - Health updates
         """
-        self.population_manager.update_populations(self.grid)
+        await self.population_manager.update_populations(self.grid)
         
     def process_agent_decisions(self):
         """

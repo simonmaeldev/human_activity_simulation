@@ -99,7 +99,7 @@ class SimulationController:
                 logging.info(f"Starting day {day}")
                 
                 # 1. Update all population activities
-                self.environment.update_populations()
+                await self.environment.update_populations()
                 
                 # 2. Process agent decisions
                 self.environment.process_agent_decisions()
