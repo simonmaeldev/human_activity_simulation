@@ -139,15 +139,13 @@ class GridAnimator:
         
         # Initial plot
         pollution_grid = self._create_pollution_frame(self.timesteps[0])
-        im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest', vmin=0, vmax=100)
-        plt.colorbar(im, ax=ax, label='Air Pollution Level (%)')
+        im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest')
+        plt.colorbar(im, ax=ax, label='Air Pollution Level')
         
         def update(frame):
-            ax.clear()
-            pollution_grid = self._create_pollution_frame(self.timesteps[frame])
-            im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest', vmin=0, vmax=100)
+            grid = self._create_pollution_frame(self.timesteps[frame])
+            im.set_array(grid)
             ax.set_title(f'Simulation Step: {self.timesteps[frame]}')
-            plt.colorbar(im, ax=ax, label='Air Pollution Level (%)')
             return [im]
             
         anim = FuncAnimation(fig, update, frames=len(self.timesteps),
