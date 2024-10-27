@@ -4,7 +4,7 @@ import logging
 
 def main():
     # Create simulation configuration
-    config = ConfigModel()
+    config = ConfigModel(grid_size=(10,10))
     
     # Initialize simulation controller
     controller = SimulationController(config)
