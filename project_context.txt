@@ -48,10 +48,15 @@ Cities:
 - Human consumption prioritized over other uses
 
 5. Pollution System:
-- Cities generate pollution based on population size
-- CO2 production from cities
-- Pollution affects resource quality except in cities
-- Pollution spreads between cells
+- Cities generate air pollution based on population size
+- Air pollution spreads quickly between cells
+- Air pollution gradually settles into ground/water pollution
+- When resources are consumed, pollution is transferred proportionally:
+  * Example: If a lake is 50% polluted and 30% of water is used,
+    15% of total pollution is removed with the water
+  * Pollution concentration remains constant unless treated
+- Only plants can reduce pollution concentration through absorption
+- Cities' pollution generation is based solely on population size
 
 6. Data Collection:
 - Track all metrics daily
