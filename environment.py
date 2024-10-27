@@ -32,10 +32,60 @@ class Environment:
             CellType.LAND: LandCell
         }
         
-        grid = [[
-            cell_types[random.choice(list(CellType))](position=(x, y))
-            for y in range(grid_size[1])
-        ] for x in range(grid_size[0])]
+        grid = []
+        for x in range(grid_size[0]):
+            row = []
+            for y in range(grid_size[1]):
+                cell_type = random.choice(list(CellType))
+                cell = cell_types[cell_type](position=(x, y))
+                
+                # Initialize populations based on cell type
+                if cell_type == CellType.CITY:
+                    # Humans in cities (20-50% of max density)
+                    human_size = int(MAX_HUMAN_DENSITY * random.uniform(0.2, 0.5))
+                    cell.populations.append(Population(
+                        type=PopulationType.HUMANS,
+                        size=human_size,
+                        health_level=100.0,
+                        resource_consumption_rate=1.0,
+                        pollution_generation_rate=0.5
+                    ))
+                
+                elif cell_type == CellType.FOREST:
+                    # Trees in forests (70-100% of max density)
+                    tree_size = int(MAX_TREE_DENSITY * random.uniform(0.7, 1.0))
+                    cell.populations.append(Population(
+                        type=PopulationType.TREES,
+                        size=tree_size,
+                        health_level=100.0,
+                        resource_consumption_rate=0.1,
+                        pollution_generation_rate=0.0
+                    ))
+                
+                elif cell_type == CellType.LAKE:
+                    # Fish in lakes (70-100% capacity)
+                    fish_size = int(1000 * random.uniform(0.7, 1.0))  # Using 1000 as base capacity
+                    cell.populations.append(Population(
+                        type=PopulationType.FISH,
+                        size=fish_size,
+                        health_level=100.0,
+                        resource_consumption_rate=0.3,
+                        pollution_generation_rate=0.0
+                    ))
+                
+                elif cell_type == CellType.LAND:
+                    # Wildlife on land (70-100% capacity)
+                    wildlife_size = int(500 * random.uniform(0.7, 1.0))  # Using 500 as base capacity
+                    cell.populations.append(Population(
+                        type=PopulationType.WILDLIFE,
+                        size=wildlife_size,
+                        health_level=100.0,
+                        resource_consumption_rate=0.5,
+                        pollution_generation_rate=0.1
+                    ))
+                
+                row.append(cell)
+            grid.append(row)
         
         # Reset random state if seed was used
         if hasattr(self.config, 'random_seed') and self.config.random_seed is not None:
