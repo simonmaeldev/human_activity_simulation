@@ -198,8 +198,11 @@ class HumanPopulation(BasePopulationProcess):
 class TreePopulation(BasePopulationProcess):
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
         super().__init__(env, population, cell, config)
-        self.co2_process = env.process(self.co2_absorption_process())
-        self.growth_process = env.process(self.growth_cycle())
+        self.co2_process = None
+        self.growth_process = None
+        self.days_unused = 0  # Track how long land has been unused
+        # Start the main process
+        self.process = env.process(self.run())
 
     async def co2_absorption_process(self):
         while self.active:
@@ -210,12 +213,6 @@ class TreePopulation(BasePopulationProcess):
             
             self.cell.global_co2_level -= absorption_rate
             await self.env.timeout(1)
-
-    def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
-        super().__init__(env, population, cell, config)
-        self.co2_process = env.process(self.co2_absorption_process())
-        self.growth_process = env.process(self.growth_cycle())
-        self.days_unused = 0  # Track how long land has been unused
 
     async def growth_cycle(self):
         while self.active:
