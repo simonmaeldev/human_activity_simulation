@@ -12,7 +12,7 @@ def main():
     
     try:
         # Run simulation for 365 days
-        results = controller.run(duration=365)
+        results = controller.run(duration=100)
         
         # Print summary statistics
         logging.info("Simulation Results:")
