@@ -66,13 +66,29 @@ class PollutionManager:
                 new_air[i][j] -= settling
                 new_ground[i][j] += settling
                 
-                # Apply natural decay based on cell type
-                decay_rate = self.config.base_pollution_decay_rate
-                if cell.cell_type == CellType.FOREST:
-                    decay_rate *= 2  # Forests clean pollution faster
+                # Apply natural decay based on cell type and health
+                base_decay = self.config.base_pollution_decay_rate
                 
-                new_air[i][j] *= (1 - decay_rate)
-                new_ground[i][j] *= (1 - decay_rate)
+                # Cell type specific decay rates
+                type_multiplier = {
+                    CellType.FOREST: 2.0,  # Forests clean pollution fastest
+                    CellType.LAKE: 1.5,    # Lakes help clean pollution
+                    CellType.LAND: 1.2,    # Natural land has some cleaning effect
+                    CellType.CITY: 0.8     # Cities are less effective at cleaning
+                }.get(cell.cell_type, 1.0)
+                
+                # Health impact on decay (healthier ecosystems clean better)
+                health_multiplier = 0.5 + (cell.health_level / 200)  # 0.5 to 1.0
+                
+                # Calculate final decay rate
+                decay_rate = base_decay * type_multiplier * health_multiplier
+                
+                # Apply decay with diminishing returns for high pollution
+                pollution_factor = 1.0 / (1.0 + max(new_air[i][j], new_ground[i][j]) / 100)
+                effective_decay = decay_rate * pollution_factor
+                
+                new_air[i][j] *= (1 - effective_decay)
+                new_ground[i][j] *= (1 - effective_decay)
                 
                 # Update cell values
                 cell.air_pollution_level = new_air[i][j]

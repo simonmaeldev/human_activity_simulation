@@ -118,12 +118,13 @@ class ResourceManager:
         This function determines resource quality by:
         1. Converting pollution level to quality impact (higher pollution = lower quality)
         2. Factoring in cell health (healthier cells = better quality)
-        3. Averaging these factors for final quality score
-        4. Clamping result between 0-1
+        3. Considering cell type specific factors
+        4. Averaging these factors for final quality score
+        5. Clamping result between 0-1
         
         Design choices:
-        - Equal weighting between health and pollution
-        - Uses average rather than multiplication to avoid too-low values
+        - Cell type weighting (forests and lakes provide better quality)
+        - Uses weighted average for more realistic modeling
         - Bounded output ensures consistent range for consumers
         
         Returns:
@@ -131,4 +132,20 @@ class ResourceManager:
         """
         pollution_impact = cell.current_pollution_level / 100
         health_factor = cell.health_level / 100
-        return max(0, min(1, (health_factor + (1 - pollution_impact)) / 2))
+        
+        # Cell type specific quality bonuses
+        type_bonus = {
+            CellType.FOREST: 0.2,  # Forests provide better quality resources
+            CellType.LAKE: 0.15,   # Lakes provide clean water
+            CellType.LAND: 0.1,    # Natural land has some quality
+            CellType.CITY: 0.0     # Cities have no natural quality bonus
+        }.get(cell.cell_type, 0.0)
+        
+        # Weighted average of factors
+        quality = (
+            (health_factor * 0.4) +           # Health is important
+            ((1 - pollution_impact) * 0.4) +  # Pollution has major impact
+            (type_bonus * 0.2)                # Cell type provides bonus
+        )
+        
+        return max(0, min(1, quality))
