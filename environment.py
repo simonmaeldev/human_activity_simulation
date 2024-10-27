@@ -8,6 +8,8 @@ from resource_manager import ResourceManager
 from pollution_manager import PollutionManager
 from data_collection.data_collector import DataCollector
 from data_collection.csv_exporter import CSVExporter
+from population import Population, PopulationType
+from constants import MAX_HUMAN_DENSITY, MAX_TREE_DENSITY
 
 class Environment:
     def __init__(self, config: ConfigModel):
