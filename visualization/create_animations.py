@@ -7,7 +7,7 @@ def main():
 #        return 1
         
 #    data_dir = sys.argv[1]
-    data_dir = "simulation_data/20241027_091424"
+    data_dir = "simulation_data/example"
 
     try:
         animator = GridAnimator(data_dir)

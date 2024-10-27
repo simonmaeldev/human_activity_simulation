@@ -1,0 +1,47 @@
+{
+    "grid_size": [
+        10,
+        10
+    ],
+    "random_seed": 42,
+    "simulation_dir": "simulation_data/20241027_105128",
+    "initial_co2_level": 0.0,
+    "base_pollution_decay_rate": 0.01,
+    "health_thresholds": {
+        "critical": 20.0,
+        "poor": 50.0,
+        "good": 80.0
+    },
+    "resource_regeneration_rates": {
+        "city": 0.1,
+        "forest": 0.5,
+        "lake": 0.3,
+        "land": 0.2
+    },
+    "population_growth_decline_thresholds": {
+        "growth": 0.2,
+        "decline": 0.1
+    },
+    "cell_conversion_thresholds": {
+        "forest_to_land": 0.3,
+        "land_to_city": 0.5
+    },
+    "pollution_spread_rates": {
+        "city": 0.2,
+        "forest": 0.1,
+        "lake": 0.05,
+        "land": 0.15
+    },
+    "resource_consumption_rates": {
+        "humans": 1.0,
+        "wildlife": 0.5,
+        "fish": 0.3,
+        "pests": 0.2,
+        "trees": 0.1
+    },
+    "human_work_cycle_duration": 8,
+    "visualization_figsize": [
+        10,
+        10
+    ]
+}
