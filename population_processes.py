@@ -1,5 +1,6 @@
 import simpy
 import random
+import logging
 from typing import List, Dict, Optional
 from cell import Cell, CellType
 from population import Population, PopulationType
@@ -13,6 +14,7 @@ from constants import (
     MAX_HUMAN_DENSITY, MAX_TREE_DENSITY,
     CITY_ABANDONMENT_DAYS, LAND_TO_FOREST_DAYS
 )
+from agents.base_agent import BaseAgent
 
 class BasePopulationProcess:
     """

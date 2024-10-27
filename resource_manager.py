@@ -1,4 +1,5 @@
 from typing import Dict, List, Optional
+import logging
 from cell import Cell, CellType
 from config_model import ConfigModel
 from population import Population, PopulationType

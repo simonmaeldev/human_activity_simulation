@@ -1,4 +1,5 @@
 from typing import List
+import logging
 from .base_agent import BaseAgent
 from cell import Cell, CellType
 from constants import MAX_TREE_DENSITY, FOREST_SPREAD_CHANCE
