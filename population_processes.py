@@ -344,7 +344,7 @@ class PopulationManager:
     def __init__(self, env: simpy.Environment, config: ConfigModel):
         self.env = env
         self.config = config
-        self.populations: Dict[Cell, List[BasePopulationProcess]] = {}
+        self.populations: Dict[Tuple[int, int], List[BasePopulationProcess]] = {}
         self.agents: Dict[Population, BaseAgent] = {}
         self.resource_manager = None  # Will be set by SimulationController
 
@@ -353,12 +353,12 @@ class PopulationManager:
         for cell in [cell for row in grid for cell in row]:
             # Create processes for new populations if needed
             for population in cell.populations:
-                if cell not in self.populations:
+                if cell.position not in self.populations:
                     self.add_population(population, cell)
             
             # Run population processes
-            if cell in self.populations:
-                for process in self.populations[cell]:
+            if cell.position in self.populations:
+                for process in self.populations[cell.position]:
                     # Ensure process is active
                     if not process.active:
                         process.active = True
@@ -369,8 +369,8 @@ class PopulationManager:
                 self.resource_manager.consume_resources(cell)
 
     def add_population(self, population: Population, cell: Cell):
-        if cell not in self.populations:
-            self.populations[cell] = []
+        if cell.position not in self.populations:
+            self.populations[cell.position] = []
 
         process_class = {
             PopulationType.HUMANS: HumanPopulation,

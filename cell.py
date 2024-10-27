@@ -38,6 +38,16 @@ class Cell(BaseModel):
     def validate_resources(cls, v):
         """Ensure resource level stays between 0 and 100"""
         return max(0.0, min(100.0, v))
+        
+    def __hash__(self):
+        """Use position tuple as hash"""
+        return hash(self.position)
+        
+    def __eq__(self, other):
+        """Compare cells by position"""
+        if not isinstance(other, Cell):
+            return NotImplemented
+        return self.position == other.position
 
 class CityCell(Cell):
     """Specialized cell type for cities"""

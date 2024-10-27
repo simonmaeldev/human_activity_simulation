@@ -19,7 +19,7 @@ class BaseAgent(ABC):
         self.cell = cell
         self.memory: Dict[str, Any] = {
             'previous_decisions': [],
-            'visited_cells': set(),
+            'visited_positions': set(),  # Store positions instead of cells
             'resource_history': [],
             'health_history': []
         }
@@ -106,7 +106,7 @@ class BaseAgent(ABC):
             decision: String describing the decision made
         """
         self.memory['previous_decisions'].append(decision)
-        self.memory['visited_cells'].add(self.cell.position)
+        self.memory['visited_positions'].add(self.cell.position)
         self.memory['resource_history'].append(self.cell.resource_level)
         self.memory['health_history'].append(self.population.health_level)
         
