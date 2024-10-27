@@ -291,6 +291,10 @@ class WildlifePopulation(BasePopulationProcess):
                     # Relocate population to healthier habitat
                     suitable_cell.populations.append(self.population)
                     self.cell.populations.remove(self.population)
+                    logging.info(
+                        f"Wildlife migration: {self.population.size} animals migrated from "
+                        f"cell {self.cell.position} to {suitable_cell.position} due to poor conditions"
+                    )
                     self.cell = suitable_cell
                 else:
                     # Population decline due to habitat loss

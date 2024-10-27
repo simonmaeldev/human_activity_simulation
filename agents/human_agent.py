@@ -54,5 +54,9 @@ class HumanAgent(BaseAgent):
             self.population.size -= migration_size
             # Add migrated population to target cell
             # This would need to be handled by the population manager
+            logging.info(
+                f"Population migration: {migration_size} humans migrated from "
+                f"cell {self.cell.position} to {best_neighbor.position}"
+            )
             return True
         return False

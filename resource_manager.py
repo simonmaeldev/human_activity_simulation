@@ -80,6 +80,15 @@ class ResourceManager:
                 break
                 
         cell.resource_level = available_resources
+        
+        # Log resource consumption
+        for population, amount in consumption_results.items():
+            if amount > 0:
+                logging.info(
+                    f"Resource consumption: {population.type.value} consumed {amount:.2f} "
+                    f"resources in cell {cell.position} ({cell.cell_type.value})"
+                )
+        
         return consumption_results
 
     def regenerate_resources(self, cell: Cell):

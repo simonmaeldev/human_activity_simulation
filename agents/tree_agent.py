@@ -36,6 +36,10 @@ class TreeAgent(BaseAgent):
                 random.random() < FOREST_SPREAD_CHANCE and
                 self.evaluate_cell_quality(neighbor) > 0.5):
                 neighbor.cell_type = CellType.FOREST
+                logging.info(
+                    f"Forest spread: Trees expanded from cell {self.cell.position} "
+                    f"to new forest cell {neighbor.position}"
+                )
                 return True
         return False
         
