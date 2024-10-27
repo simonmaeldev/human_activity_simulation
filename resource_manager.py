@@ -30,9 +30,10 @@ class ResourceManager:
     This allows the manager to enforce priorities and handle complex interactions
     between different populations and cell types consistently.
     """
-    def __init__(self, config: ConfigModel):
+    def __init__(self, config: ConfigModel, grid: List[List[Cell]]):
         self.config = config
         self.water_system = WaterSystem()
+        self.grid = grid
         # Priority system ensures humans get resources first in times of scarcity
         # Lower number = higher priority
         self.resource_priorities = {

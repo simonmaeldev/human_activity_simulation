@@ -15,7 +15,7 @@ class Environment:
         self.grid = self._initialize_grid(config.grid_size)
         self.config = config
         self.population_manager = PopulationManager(self.env, config)
-        self.resource_manager = ResourceManager(config)
+        self.resource_manager = ResourceManager(config, self.grid)
         self.pollution_manager = PollutionManager(config)
         self.data_collector = DataCollector()
         self.csv_exporter = CSVExporter()
