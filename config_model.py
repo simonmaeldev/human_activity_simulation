@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 
 class ConfigModel(BaseModel):
     grid_size: Tuple[int, int] = Field(default=(100, 100), description="Grid size as (width, height)")
+    random_seed: Optional[int] = Field(default=None, description="Random seed for reproducible simulations")
     initial_co2_level: float = Field(default=0.0, description="Initial global CO2 level")
     base_pollution_decay_rate: float = Field(default=0.01, description="Base rate at which pollution decays")
     health_thresholds: Dict[str, float] = Field(default={"critical": 20.0, "poor": 50.0, "good": 80.0}, description="Health thresholds for populations")
