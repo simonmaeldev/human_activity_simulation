@@ -12,7 +12,11 @@ from constants import (
     TREE_CO2_ABSORPTION_FACTOR, TREE_GROWTH_RATE,
     FOREST_SPREAD_CHANCE, COMMUTE_POLLUTION_MULTIPLIER,
     MAX_HUMAN_DENSITY, MAX_TREE_DENSITY,
-    CITY_ABANDONMENT_DAYS, LAND_TO_FOREST_DAYS
+    CITY_ABANDONMENT_DAYS, LAND_TO_FOREST_DAYS,
+    MAX_WILDLIFE_MOVEMENT_RADIUS = 3,
+    WILDLIFE_BASE_SUCCESS_RATE = 0.7,  # 70% base chance
+    WILDLIFE_DISTANCE_PENALTY = 0.2,    # -20% per cell distance
+    WILDLIFE_HEALTH_BONUS = 0.3         # Up to +30% from health
 )
 from agents.base_agent import BaseAgent
 
@@ -300,6 +304,7 @@ class WildlifePopulation(BasePopulationProcess):
         super().__init__(env, population, cell, config)
         self.consumption_process = env.process(self.resource_consumption_process())
         self.relocation_process = env.process(self.relocation_check_process())
+        self.colonization_process = env.process(self.colonization_process())
 
     async def resource_consumption_process(self):
         """
@@ -364,27 +369,91 @@ class WildlifePopulation(BasePopulationProcess):
             await self.env.timeout(24)  # Daily habitat assessment
 
     def find_suitable_cell(self) -> Optional[Cell]:
+        """Find suitable cells for wildlife within movement radius"""
+        from environment import Environment
+        env = Environment._instance
+        
+        suitable_cells = []
+        x, y = self.cell.position
+        
+        # Check cells within radius
+        for i in range(-MAX_WILDLIFE_MOVEMENT_RADIUS, MAX_WILDLIFE_MOVEMENT_RADIUS + 1):
+            for j in range(-MAX_WILDLIFE_MOVEMENT_RADIUS, MAX_WILDLIFE_MOVEMENT_RADIUS + 1):
+                if i == 0 and j == 0:  # Skip current cell
+                    continue
+                    
+                # Check if within radius
+                if (i*i + j*j) > MAX_WILDLIFE_MOVEMENT_RADIUS * MAX_WILDLIFE_MOVEMENT_RADIUS:
+                    continue
+                    
+                new_x, new_y = x + i, y + j
+                if 0 <= new_x < len(env.grid) and 0 <= new_y < len(env.grid[0]):
+                    cell = env.grid[new_x][new_y]
+                    if (cell.cell_type == CellType.FOREST and
+                        cell.health_level > 70 and
+                        cell.resource_level > 50):
+                        suitable_cells.append(cell)
+        
+        return random.choice(suitable_cells) if suitable_cells else None
+
+    def _calculate_distance(self, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> float:
+        """Calculate Manhattan distance between two positions"""
+        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+
+    async def colonization_process(self):
         """
-        Searches for a suitable new habitat cell for wildlife relocation.
+        Manages wildlife colonization of new territories.
         
-        This method:
-        1. Evaluates neighboring cells for habitat suitability
-        2. Considers cell health and existing populations
-        3. Prioritizes cells of matching type (forest/lake)
-        
-        Returns:
-            Optional[Cell]: A suitable cell for relocation, or None if none found
-        
-        Note: Current implementation is a placeholder. Full implementation
-        would need to consider:
-        - Distance from current cell
-        - Resource availability
-        - Existing wildlife populations
-        - Migration corridors
+        This process:
+        1. Attempts to colonize nearby forests within movement radius
+        2. Success chance based on:
+           - Population health (higher health = better chance)
+           - Distance to target (further = lower chance)
+           - Base success rate
+        3. May result in population loss during travel
         """
-        # Find nearest cell with good health and matching type
-        # Implementation depends on grid structure
-        return None
+        while self.active:
+            if (self.population.size > 50 and  # Minimum population for colonization
+                self.population.health_level > 70):  # Good health required
+                
+                suitable_cell = self.find_suitable_cell()
+                if suitable_cell:
+                    distance = self._calculate_distance(self.cell.position, suitable_cell.position)
+                    
+                    # Calculate success chance
+                    success_chance = (WILDLIFE_BASE_SUCCESS_RATE +
+                                   (self.population.health_level / 100 * WILDLIFE_HEALTH_BONUS) -
+                                   (distance * WILDLIFE_DISTANCE_PENALTY))
+                    
+                    if random.random() < success_chance:
+                        # Determine colonizing population size (10-20% of current)
+                        colonists = int(self.population.size * random.uniform(0.1, 0.2))
+                        self.population.size -= colonists
+                        
+                        # Create new population in target cell
+                        new_population = Population(
+                            type=PopulationType.WILDLIFE,
+                            size=colonists,
+                            health_level=self.population.health_level * 0.8,  # Slight health penalty from travel
+                            resource_consumption_rate=self.population.resource_consumption_rate,
+                            pollution_generation_rate=self.population.pollution_generation_rate
+                        )
+                        
+                        suitable_cell.populations.append(new_population)
+                        logging.info(
+                            f"Wildlife colonization: {colonists} animals successfully colonized "
+                            f"from {self.cell.position} to {suitable_cell.position}"
+                        )
+                    else:
+                        # Failed colonization attempt - some population lost
+                        lost_population = int(self.population.size * 0.05)  # 5% loss on failure
+                        self.population.size -= lost_population
+                        logging.info(
+                            f"Failed wildlife colonization: Lost {lost_population} animals "
+                            f"attempting to move from {self.cell.position} to {suitable_cell.position}"
+                        )
+            
+            yield self.env.timeout(30)  # Monthly colonization attempts
 
 from agents.human_agent import HumanAgent
 from agents.tree_agent import TreeAgent
