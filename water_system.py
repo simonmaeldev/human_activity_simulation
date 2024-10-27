@@ -18,7 +18,7 @@ class WaterSystem:
                     network = self._flood_fill(grid, i, j, visited)
                     self.lake_networks.append(network)
     
-    def _flood_fill(self, grid: List[List[Cell]], i: int, j: int, visited: Set[Tuple[int, int]]) -> Set[Tuple[int, int]]:
+    def _flood_fill(self, grid: List[List[Cell]], i: int, j: int, visited: Set[Tuple[int, int]]) -> Set[Cell]:
         """Find all connected lake cells using flood fill algorithm"""
         if not (0 <= i < len(grid) and 0 <= j < len(grid[0])):
             return set()
