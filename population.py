@@ -15,6 +15,16 @@ class Population(BaseModel):
     resource_consumption_rate: float = Field(default=0.0, description="Rate at which the population consumes resources")
     pollution_generation_rate: float = Field(default=0.0, description="Rate at which the population generates pollution")
 
+    def __hash__(self):
+        # Use a combination of type and unique attributes to create hash
+        return hash((self.type, id(self)))
+        
+    def __eq__(self, other):
+        if not isinstance(other, Population):
+            return NotImplemented
+        # Compare based on type and identity
+        return self.type == other.type and id(self) == id(other)
+
     class Config:
         allow_mutation = True
         arbitrary_types_allowed = True
