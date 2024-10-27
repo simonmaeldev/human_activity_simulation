@@ -24,6 +24,10 @@ class SimulationController:
         self.environment = Environment(config)
         self.start_time: Optional[datetime] = None
         self.end_time: Optional[datetime] = None
+        # Create timestamped logs directory
+        self.start_time = datetime.now()
+        self.log_dir = f"logs_{self.start_time.strftime('%Y%m%d_%H%M%S')}"
+        Path(self.log_dir).mkdir(exist_ok=True)
         self._setup_logging()
 
     def _setup_logging(self) -> None:
@@ -44,12 +48,6 @@ class SimulationController:
         """
         # Create output directories
         Path("simulation_data").mkdir(exist_ok=True)
-        
-        # Create timestamped logs directory
-        self.start_time = datetime.now()
-        self.log_dir = f"logs_{self.start_time.strftime('%Y%m%d_%H%M%S')}"
-        Path(self.log_dir).mkdir(exist_ok=True)
-        
         logging.info("Initializing simulation...")
 
     def run(self, duration: int) -> Dict[str, Any]:
