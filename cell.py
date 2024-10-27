@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Tuple
 from enum import Enum
 from population import Population
@@ -24,17 +24,17 @@ class Cell(BaseModel):
         """Calculate total pollution level"""
         return (self.air_pollution_level + self.ground_pollution_level) / 2
 
-    @validator('health_level')
+    @field_validator('health_level')
     def validate_health(cls, v):
         """Ensure health level stays between 0 and 100"""
         return max(0.0, min(100.0, v))
 
-    @validator('air_pollution_level', 'ground_pollution_level')
+    @field_validator('air_pollution_level', 'ground_pollution_level')
     def validate_pollution(cls, v):
         """Ensure pollution levels are non-negative"""
         return max(0.0, v)
 
-    @validator('resource_level')
+    @field_validator('resource_level')
     def validate_resources(cls, v):
         """Ensure resource level stays between 0 and 100"""
         return max(0.0, min(100.0, v))
