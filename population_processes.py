@@ -224,6 +224,56 @@ class TreePopulation(BasePopulationProcess):
             
             yield self.env.timeout(1)
 
+    def health_update_process(self):
+        """
+        Update tree population health based on water consumption and pollution.
+        Trees consume water from all adjacent water sources.
+        Health changes are based on the pollution levels of consumed water.
+        """
+        while self.active:
+            # Find all adjacent lake cells
+            adjacent_lakes = [cell for cell in self.cell.neighbors 
+                            if cell.cell_type == CellType.LAKE]
+            
+            if adjacent_lakes:
+                total_health_change = 0
+                water_sources = len(adjacent_lakes)
+                
+                for lake in adjacent_lakes:
+                    # Calculate health impact from this water source
+                    pollution_level = lake.current_pollution_level
+                    health_change = self._calculate_health_change(pollution_level)
+                    total_health_change += health_change / water_sources  # Average impact
+                    
+                    # Consume some water from this source
+                    consumed = min(lake.resource_level, 
+                                 self.population.resource_consumption_rate / water_sources)
+                    lake.resource_level -= consumed
+                
+                # Apply total health change
+                self.population.health_level = max(0.0, min(100.0, 
+                    self.population.health_level + total_health_change))
+            else:
+                # Trees without water access slowly lose health
+                self.population.health_level = max(0.0, 
+                    self.population.health_level - 0.01)
+            
+            yield self.env.timeout(1)
+
+    def _calculate_health_change(self, pollution_level: float) -> float:
+        """
+        Calculate health change based on pollution level of consumed water.
+        
+        Args:
+            pollution_level: Current pollution level (0-100)
+            
+        Returns:
+            float: Health change amount (-0.01 to +0.01)
+        """
+        # Linear interpolation between max gain (0% pollution) and max loss (100% pollution)
+        max_change = 0.01
+        return max_change * (1 - (2 * pollution_level / 100))
+
     def growth_process(self):
         """
         Manages tree population growth and spread based on environmental conditions.
@@ -436,6 +486,7 @@ class WildlifePopulation(BasePopulationProcess):
             self.env.process(self.resource_consumption_process())
             self.env.process(self.relocation_check_process())
             self.env.process(self.colonization_process())
+            self.env.process(self.health_update_process())
             yield self.env.timeout(1)
 
 from agents.human_agent import HumanAgent
