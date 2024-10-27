@@ -2,6 +2,7 @@ from typing import Dict, List
 from cell import Cell, CellType
 from config_model import ConfigModel
 from population import Population, PopulationType
+from water_system import WaterSystem
 
 class ResourceManager:
     """
@@ -10,9 +11,12 @@ class ResourceManager:
     - Resource regeneration based on cell health and pollution
     - Resource transfer between cells
     - Resource quality calculations
+    - Water flow between connected lakes
+    - Irrigation effects on pollution
     """
     def __init__(self, config: ConfigModel):
         self.config = config
+        self.water_system = WaterSystem()
         # Priority system ensures humans get resources first in times of scarcity
         # Lower number = higher priority
         self.resource_priorities = {
