@@ -51,10 +51,13 @@ class BasePopulationProcess:
     def run(self):
         """Base run method that implements basic population mechanics"""
         try:
-            # Start the coroutines properly and store their tasks
-            self.work_cycle = self.env.process(self.daily_cycle())
+            # Start the growth and health cycles for all populations
             self.growth_cycle = self.env.process(self.growth_process())
             self.health_cycle = self.env.process(self.health_update_process())
+            
+            # Only start daily cycle if the population type has one
+            if hasattr(self, 'daily_cycle'):
+                self.work_cycle = self.env.process(self.daily_cycle())
             
             while self.active:
                 # Basic population mechanics
@@ -199,8 +202,7 @@ class HumanPopulation(BasePopulationProcess):
 class TreePopulation(BasePopulationProcess):
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
         super().__init__(env, population, cell, config)
-        self.co2_process = None
-        self.growth_process = None
+        self.co2_process = env.process(self.co2_absorption_process())
         self.days_unused = 0  # Track how long land has been unused
         # Start the main process
         self.process = env.process(self.run())
