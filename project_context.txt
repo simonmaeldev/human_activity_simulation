@@ -16,47 +16,44 @@ Core Concepts:
 - Pests (in lands)
 - Trees/Plants (in forests)
 
-3. Resources and Health:
-- Each cell and population has health (0-100%)
-- Resources: water, food, clean air
-- Resource quality affected by pollution
-- Consuming polluted resources reduces health
-- Proximity to nature increases health
+3. Resource System:
+Lakes:
+- Natural water regeneration at constant rate
+- Water level shared between connected lake cells
+- Supports aquatic life (fish populations)
+- Pollution levels shared between connected lake cells
 
-4. Pollution Mechanics:
-- Global CO2 tracking across entire grid
-- Local pollution in cells
+Lands:
+- Produces food
+- Requires water for irrigation
+- Absorbs some water pollution during irrigation
+- Food consumed by humans and pests
+
+Forests:
+- Produces trees as resource
+- Contains wildlife populations
+- Consumes water
+- Wildlife consumes small amounts of trees and water
+
+Cities:
+- Consume water for human population
+- Consume food from lands
+- Produce CO2 and pollution based solely on population
+- Pollution production not affected by existing pollution
+
+4. Resource Interactions:
+- Water flows between connected lake cells
+- Irrigation of lands helps clean water pollution
+- Forest water consumption affects local water availability
+- Human consumption prioritized over other uses
+
+5. Pollution System:
+- Cities generate pollution based on population size
+- CO2 production from cities
+- Pollution affects resource quality except in cities
 - Pollution spreads between cells
-- Trees reduce global CO2
-- Natural pollution decay over time
 
-5. Human Activity (Daily Steps):
-- Each simulation step represents one day
-- Daily activities happen simultaneously:
-  * Work and commuting generate pollution and CO2
-  * Resource consumption occurs once per day
-  * Pollution impact is calculated daily
-- Humans have priority in resource consumption
-- Cities expand based on health and resource abundance
-- Can convert forests/lands to cities, forests to lands
-
-6. Environmental Rules:
-- Resources regenerate daily based on cell health
-- Populations adjust to environmental conditions each day
-- Water refills at daily rate
-- Wildlife relocates if habitat becomes critically unhealthy
-- Cell type conversions are agent-driven decisions:
-  * Humans (through city planning) can convert:
-    - Forest to Land (deforestation)
-    - Land to City (urbanization)
-    - Land to Forest (reforestation)
-  * Each conversion action:
-    - Generates CO2 emissions
-    - Creates temporary pollution in surrounding cells
-    - Requires resource investment
-    - Takes multiple days to complete
-
-7. Data Collection:
+6. Data Collection:
 - Track all metrics daily
 - Export data to CSV files by cell type
 
