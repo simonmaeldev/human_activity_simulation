@@ -1,5 +1,6 @@
 import simpy
 import random
+import logging
 from typing import List, Tuple, Optional, Dict
 from cell import Cell, CellType, CityCell, ForestCell, LakeCell, LandCell
 from config_model import ConfigModel
