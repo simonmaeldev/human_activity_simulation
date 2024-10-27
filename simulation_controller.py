@@ -29,9 +29,9 @@ class SimulationController:
         config.simulation_dir = f"simulation_data/{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.config = config
         
-        # Initialize managers
-        self.env = simpy.Environment()
-        self.grid = self._initialize_grid(config.grid_size)
+        # Initialize environment first to get access to grid
+        self.env = self.environment.env
+        self.grid = self.environment.grid
         
         # Initialize managers
         self.resource_manager = ResourceManager(config, self.grid)
