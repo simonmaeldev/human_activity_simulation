@@ -14,9 +14,10 @@ class BaseAgent(ABC):
     - Move between cells when needed
     - Track its history and learn from past decisions
     """
-    def __init__(self, population: Population, cell: Cell):
+    def __init__(self, population: Population, cell: Cell, config: ConfigModel):
         self.population = population
         self.cell = cell
+        self.config = config
         self.memory: Dict[str, Any] = {
             'previous_decisions': [],
             'visited_positions': set(),  # Store positions instead of cells

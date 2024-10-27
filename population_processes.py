@@ -392,7 +392,7 @@ class PopulationManager:
             }.get(population.type)
             
             if agent_class:
-                self.agents[population] = agent_class(population, cell)
+                self.agents[population] = agent_class(population, cell, self.config)
 
     def manage_resources(self):
         """Ensure humans have priority access to resources"""
