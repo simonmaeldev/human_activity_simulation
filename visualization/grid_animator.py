@@ -1,4 +1,5 @@
 import os
+import json
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,8 +19,21 @@ class GridAnimator:
             'land': 'yellow'
         }
         
-        # Load data
+        # Load config and data
+        self._load_config()
         self._load_data()
+
+    def _load_config(self):
+        """Load configuration from JSON file"""
+        config_path = os.path.join(self.data_dir, 'config.json')
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                self.config = json.load(f)
+        else:
+            # Default config if file doesn't exist
+            self.config = {
+                'visualization_figsize': (10, 10)
+            }
         
     def _load_data(self):
         """Load all CSV files from the data directory"""
@@ -84,7 +98,7 @@ class GridAnimator:
         
     def animate_grid(self, output_file: str = 'grid_animation.mp4'):
         """Create animation of grid state changes"""
-        fig, ax = plt.subplots(figsize=(10, 10))
+        fig, ax = plt.subplots(figsize=tuple(self.config['visualization_figsize']))
         
         # Create custom colormap for cell types
         colors = ['grey', 'blue', 'green', 'yellow']
@@ -118,7 +132,7 @@ class GridAnimator:
         
     def animate_pollution(self, output_file: str = 'pollution_animation.mp4'):
         """Create animation of pollution levels"""
-        fig, ax = plt.subplots(figsize=(10, 10))
+        fig, ax = plt.subplots(figsize=tuple(self.config['visualization_figsize']))
         
         # Create custom colormap from white to black for pollution
         pollution_cmap = LinearSegmentedColormap.from_list('pollution', ['white', 'black'])

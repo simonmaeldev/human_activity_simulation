@@ -14,6 +14,7 @@ class ConfigModel(BaseModel):
     pollution_spread_rates: Dict[str, float] = Field(default={"city": 0.2, "forest": 0.1, "lake": 0.05, "land": 0.15}, description="Pollution spread rates per cell type")
     resource_consumption_rates: Dict[str, float] = Field(default={"humans": 1.0, "wildlife": 0.5, "fish": 0.3, "pests": 0.2, "trees": 0.1}, description="Resource consumption rates per population type")
     human_work_cycle_duration: int = Field(default=8, description="Duration of human work cycle in hours")
+    visualization_figsize: Tuple[int, int] = Field(default=(10, 10), description="Figure size for visualizations (width, height)")
 
     class Config:
         allow_mutation = True

@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 import os
+import json
 from datetime import datetime
 import pandas as pd
 from cell import CellType
@@ -56,11 +57,20 @@ class CSVExporter:
             filenames[pop_type] = filename
         return filenames
 
-    def export_all(self, data_collector: DataCollector) -> Dict[str, str]:
-        """Export all collected data to CSV files"""
+    def export_config(self, config) -> str:
+        """Export configuration to JSON file"""
+        filename = self._get_filename("config")
+        filename = filename.replace('.csv', '.json')
+        with open(filename, 'w') as f:
+            json.dump(config.dict(), f, indent=4)
+        return filename
+
+    def export_all(self, data_collector: DataCollector, config) -> Dict[str, str]:
+        """Export all collected data to CSV files and configuration"""
         results = {
             'global_metrics': self.export_global_metrics(data_collector),
             'cell_data': self.export_cell_data(data_collector),
-            'population_metrics': self.export_population_metrics(data_collector)
+            'population_metrics': self.export_population_metrics(data_collector),
+            'config': self.export_config(config)
         }
         return results
