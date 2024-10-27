@@ -1,7 +1,7 @@
 import simpy
 import random
 from typing import List, Tuple, Optional, Dict
-from cell import Cell, CellType
+from cell import Cell, CellType, CityCell, ForestCell, LakeCell, LandCell
 from config_model import ConfigModel
 from population_processes import PopulationManager
 from resource_manager import ResourceManager
