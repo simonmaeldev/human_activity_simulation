@@ -117,7 +117,7 @@ class HumanPopulation(BasePopulationProcess):
             # Wait for next day
             yield self.env.timeout(1)  # One step = one day
 
-    async def growth_process(self):
+    def growth_process(self):
         """
         Manages population growth and decline based on environmental conditions.
         
@@ -153,7 +153,7 @@ class HumanPopulation(BasePopulationProcess):
                     self.population.size = int(self.population.size * HUMAN_GROWTH_RATE)
                 else:
                     # Try to expand to adjacent land when at capacity
-                    await self.try_expand_city()
+                    yield self.env.process(self.try_expand_city())
             elif decline_conditions:
                 # Apply population decline
                 self.population.size = int(self.population.size * HUMAN_DECLINE_RATE)
@@ -166,9 +166,9 @@ class HumanPopulation(BasePopulationProcess):
                 else:
                     self.days_abandoned = 0
             
-            await self.env.timeout(7)  # Weekly population assessment
+            yield self.env.timeout(7)  # Weekly population assessment
 
-    async def try_expand_city(self):
+    def try_expand_city(self):
         for neighbor in self.cell.neighbors:
             if (neighbor.cell_type == CellType.LAND and 
                 neighbor.health_level > self.config.health_thresholds["good"] and
