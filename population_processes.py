@@ -50,23 +50,28 @@ class BasePopulationProcess:
 
     async def run(self):
         """Base run method that implements basic population mechanics"""
-        # Start the coroutines properly
-        self.work_cycle = self.env.process(self.daily_cycle())
-        self.growth_cycle = self.env.process(self.growth_process())
-        self.health_cycle = self.env.process(self.health_update_process())
-        
-        while self.active:
-            # Basic population mechanics
-            await self.update_health(0)  # Base health change
+        try:
+            # Start the coroutines properly and store their tasks
+            self.work_cycle = self.env.process(await self.daily_cycle())
+            self.growth_cycle = self.env.process(await self.growth_process())
+            self.health_cycle = self.env.process(await self.health_update_process())
             
-            # Check for population extinction
-            if self.population.size <= 0 or self.population.health_level <= 0:
-                self.stop()
-                if self.population in self.cell.populations:
-                    self.cell.populations.remove(self.population)
-                break
-            
-            await self.env.timeout(1)  # Wait one day
+            while self.active:
+                # Basic population mechanics
+                await self.update_health(0)  # Base health change
+                
+                # Check for population extinction
+                if self.population.size <= 0 or self.population.health_level <= 0:
+                    self.stop()
+                    if self.population in self.cell.populations:
+                        self.cell.populations.remove(self.population)
+                    break
+                
+                await self.env.timeout(1)  # Wait one day
+                
+        except Exception as e:
+            logging.error(f"Error in population process: {str(e)}")
+            raise
 
     async def update_health(self, amount: float):
         """
