@@ -72,7 +72,7 @@ class BasePopulationProcess:
                         self.cell.populations.remove(self.population)
                     break
                 
-                yield self.env.timeout(1)  # Wait one day
+                yield self.env.timeout(1)  # One step = one day
                 
         except Exception as e:
             logging.error(f"Error in population process: {str(e)}")
