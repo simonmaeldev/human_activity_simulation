@@ -3,6 +3,47 @@ PROJECT CONTEXT - Agent-Based Environmental Simulation
 Purpose:
 This project creates an agent-based simulation where different populations act as autonomous agents, making decisions to survive, grow, and expand within their environment. The simulation models how these agent decisions and interactions lead to emergent environmental patterns and changes over time.
 
+How The Code Works:
+1. Entry Point and Flow:
+   - main.py creates the initial configuration (grid size, random seed)
+   - SimulationController orchestrates the entire simulation
+   - Each simulation day updates environment, populations, and collects data
+   - Results are logged and exported to CSV files
+
+2. Key Components and Files:
+   - SimulationController (simulation_controller.py): Main orchestrator
+   - Environment (environment.py): Manages the grid and cell states
+   - Cell Types (cell.py): CITY, FOREST, LAKE, LAND implementations
+   - Population Types (population.py): HUMANS, WILDLIFE, FISH, PESTS, TREES
+   - Managers:
+     * ResourceManager: Handles resource consumption and regeneration
+     * PollutionManager: Controls pollution spread and decay
+     * PopulationManager: Manages population behaviors
+     * Cell-specific managers in cell_managers/
+
+3. Configuration:
+   - ConfigModel (config_model.py): Customizable parameters
+     * Grid size, random seed
+     * Resource regeneration rates
+     * Health thresholds
+     * Population thresholds
+   - Constants (constants.py): Fixed simulation parameters
+     * Growth/decline rates
+     * Maximum densities
+     * Time thresholds
+     * Health impact factors
+
+4. Data Collection and Output:
+   - DataCollector: Gathers metrics about cells, populations, global state
+   - CSVExporter: Exports data to timestamped directories
+   - Logging: Progress updates and simulation statistics
+
+5. Time Scales:
+   - Daily: Resource consumption, pollution spread, health updates
+   - Weekly: Population growth/decline checks, progress logging
+   - Yearly: City abandonment (365 days)
+   - Long-term: Forest growth (1825 days)
+
 Core Concepts:
 1. Agent Types and Goals:
 Each population type is an autonomous agent with primary objectives:
