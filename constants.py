@@ -32,5 +32,11 @@ WEEKLY_TIMEOUT = 7
 MONTHLY_TIMEOUT = 30
 DAILY_TIMEOUT = 1
 
+# Wildlife Movement Constants
+MAX_WILDLIFE_MOVEMENT_RADIUS = 3
+WILDLIFE_BASE_SUCCESS_RATE = 0.7  # 70% base chance
+WILDLIFE_DISTANCE_PENALTY = 0.2   # -20% per cell distance
+WILDLIFE_HEALTH_BONUS = 0.3       # Up to +30% from health
+
 # Resource Management
 COMMUTE_POLLUTION_MULTIPLIER = 2  # Two commutes per day
