@@ -78,7 +78,7 @@ class BasePopulationProcess:
             logging.error(f"Error in population process: {str(e)}")
             raise
 
-    async def update_health(self, amount: float):
+    def update_health(self, amount: float):
         """
         Update population health level, keeping it within 0-100 range.
         
@@ -352,7 +352,7 @@ class WildlifePopulation(BasePopulationProcess):
         super().__init__(env, population, cell, config)
         self.process = env.process(self.run())
 
-    async def health_update_process(self):
+    def health_update_process(self):
         """
         Update wildlife population health based on:
         - Resource quality (pollution levels)
@@ -382,8 +382,8 @@ class WildlifePopulation(BasePopulationProcess):
                 quality_factor = 1 - (self.cell.current_pollution_level / 100)
                 health_change += (consumed_resources / self.population.size) * quality_factor
             
-            await self.update_health(health_change)
-            await self.env.timeout(1)
+            self.population.health_level = max(0.0, min(100.0, self.population.health_level + health_change))
+            yield self.env.timeout(1)
 
     def resource_consumption_process(self):
         """
