@@ -44,26 +44,22 @@ class DataCollector:
         }
         self.global_metrics.append(metrics)
 
-    def collect_cell_data(self, cell: Cell) -> None:
+    def collect_cell_data(self, cell: Cell, step: int) -> None:
         """Collect data for a specific cell"""
-        timestamp = datetime.now()
         data = {
-            'timestamp': timestamp,
+            'step': step,
             'position': cell.position,
             'health_level': cell.health_level,
             'resource_level': cell.resource_level,
             'air_pollution': cell.air_pollution_level,
-            'ground_pollution': cell.ground_pollution_level,
-            'total_population': sum(pop.size for pop in cell.populations),
-            'population_types': [pop.type.value for pop in cell.populations]
+            'ground_pollution': cell.ground_pollution_level
         }
         self.cell_data[cell.cell_type].append(data)
 
-    def collect_population_metrics(self, population, cell: Cell) -> None:
+    def collect_population_metrics(self, population, cell: Cell, step: int) -> None:
         """Collect metrics for a specific population"""
-        timestamp = datetime.now()
         metrics = {
-            'timestamp': timestamp,
+            'step': step,
             'cell_position': cell.position,
             'cell_type': cell.cell_type.value,
             'population_size': population.size,
