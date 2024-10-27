@@ -11,9 +11,9 @@ from data_collection.csv_exporter import CSVExporter
 
 class Environment:
     def __init__(self, config: ConfigModel):
+        self.config = config  # Store config first so it's available for _initialize_grid
         self.env = simpy.Environment()
         self.grid = self._initialize_grid(config.grid_size)
-        self.config = config
         self.population_manager = PopulationManager(self.env, config)
         self.resource_manager = ResourceManager(config, self.grid)
         self.pollution_manager = PollutionManager(config)
