@@ -202,6 +202,15 @@ class ResourceManager:
         target.resource_level += actual_transfer
         return actual_transfer
 
+    def update_resources(self, grid: List[List[Cell]]):
+        """Update resources for all cells"""
+        for row in grid:
+            for cell in row:
+                # Process resource consumption
+                self.consume_resources(cell)
+                # Regenerate resources
+                self.regenerate_resources(cell)
+
     def calculate_resource_quality(self, cell: Cell) -> float:
         """
         Calculates the quality of resources in a cell.

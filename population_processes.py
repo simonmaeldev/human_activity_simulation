@@ -39,18 +39,26 @@ class BasePopulationProcess:
         self.cell = cell
         self.config = config
         self.active = True
-        self.process = env.process(self.run())
+        self.process = None  # Don't start process immediately - let PopulationManager control this
 
     def stop(self):
         """Gracefully stop this population process"""
         self.active = False
 
     async def run(self):
-        """
-        Abstract method that must be implemented by subclasses.
-        Defines the main behavior loop for each population type.
-        """
-        raise NotImplementedError("Subclasses must implement run()")
+        """Base run method that implements basic population mechanics"""
+        while self.active:
+            # Basic population mechanics
+            await self.update_health(0)  # Base health change
+            
+            # Check for population extinction
+            if self.population.size <= 0 or self.population.health_level <= 0:
+                self.stop()
+                if self.population in self.cell.populations:
+                    self.cell.populations.remove(self.population)
+                break
+            
+            await self.env.timeout(1)  # Wait one day
 
     async def update_health(self, amount: float):
         """
@@ -338,6 +346,25 @@ class PopulationManager:
         self.config = config
         self.populations: Dict[Cell, List[BasePopulationProcess]] = {}
         self.agents: Dict[Population, BaseAgent] = {}
+
+    def update_populations(self, grid: List[List[Cell]]):
+        """Update all populations across the grid"""
+        for cell in [cell for row in grid for cell in row]:
+            # Create processes for new populations if needed
+            for population in cell.populations:
+                if cell not in self.populations:
+                    self.add_population(population, cell)
+            
+            # Run population processes
+            if cell in self.populations:
+                for process in self.populations[cell]:
+                    # Ensure process is active
+                    if not process.active:
+                        process.active = True
+                        process.process = self.env.process(process.run())
+            
+            # Resource consumption for all populations
+            self.config.resource_manager.consume_resources(cell)
 
     def add_population(self, population: Population, cell: Cell):
         if cell not in self.populations:

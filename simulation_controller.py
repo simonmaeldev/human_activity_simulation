@@ -23,6 +23,24 @@ class SimulationController:
         # Set simulation directory in config
         config.simulation_dir = f"simulation_data/{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.config = config
+        
+        # Initialize managers
+        self.env = simpy.Environment()
+        self.grid = self._initialize_grid(config.grid_size)
+        
+        # Initialize managers
+        self.resource_manager = ResourceManager(config, self.grid)
+        self.pollution_manager = PollutionManager(config)
+        self.water_system = WaterSystem()
+        
+        # Connect resource manager to config for other components to access
+        self.config.resource_manager = self.resource_manager
+        
+        # Initialize population manager last so it has access to other systems
+        self.population_manager = PopulationManager(self.env, config)
+        
+        self.data_collector = DataCollector()
+        
         self.environment = Environment(config)
         self.start_time = datetime.now()
         self.end_time: Optional[datetime] = None
