@@ -323,11 +323,15 @@ class WildlifePopulation(BasePopulationProcess):
         # Implementation depends on grid structure
         return None
 
+from agents.human_agent import HumanAgent
+from agents.tree_agent import TreeAgent
+
 class PopulationManager:
     def __init__(self, env: simpy.Environment, config: ConfigModel):
         self.env = env
         self.config = config
         self.populations: Dict[Cell, List[BasePopulationProcess]] = {}
+        self.agents: Dict[Population, BaseAgent] = {}
 
     def add_population(self, population: Population, cell: Cell):
         if cell not in self.populations:
@@ -342,9 +346,24 @@ class PopulationManager:
         if process_class:
             process = process_class(self.env, population, cell, self.config)
             self.populations[cell].append(process)
+            
+            # Create corresponding agent
+            agent_class = {
+                PopulationType.HUMANS: HumanAgent,
+                PopulationType.TREES: TreeAgent,
+            }.get(population.type)
+            
+            if agent_class:
+                self.agents[population] = agent_class(population, cell)
 
     def manage_resources(self):
         """Ensure humans have priority access to resources"""
+        # First let agents make decisions
+        for population, agent in self.agents.items():
+            decisions = agent.make_decisions()
+            # Log decisions for analysis
+            if decisions:
+                logging.info(f"Agent decisions for {population.type}: {decisions}")
         for cell, processes in self.populations.items():
             # Sort processes to prioritize humans
             processes.sort(key=lambda p: p.population.type != PopulationType.HUMANS)
