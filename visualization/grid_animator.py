@@ -139,8 +139,8 @@ class GridAnimator:
         
         # Initial plot
         pollution_grid = self._create_pollution_frame(self.timesteps[0])
-        im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest')
-        plt.colorbar(im, ax=ax, label='Air Pollution Level')
+        im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest', vmin=0, vmax=1)
+        plt.colorbar(im, ax=ax, label='Air Pollution Level (0=Clean, 1=Polluted)')
         
         def update(frame):
             grid = self._create_pollution_frame(self.timesteps[frame])
