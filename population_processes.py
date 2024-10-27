@@ -222,6 +222,47 @@ class TreePopulation(BasePopulationProcess):
             
             yield self.env.timeout(1)
 
+    def growth_process(self):
+        """
+        Manages tree population growth and spread based on environmental conditions.
+        
+        This process:
+        1. Evaluates environmental conditions (health and resources)
+        2. Triggers growth when conditions are favorable
+        3. Manages natural spread to adjacent cells
+        4. Runs on a monthly cycle (trees grow slower than other populations)
+        """
+        while self.active:
+            current_density = self.population.size
+            growth_conditions = (
+                self.cell.health_level > 70 and 
+                self.cell.resource_level > self.config.resource_regeneration_rates["forest"]
+            )
+
+            if growth_conditions:
+                if current_density < MAX_TREE_DENSITY:
+                    self.population.size = int(self.population.size * TREE_GROWTH_RATE)
+                
+                # Potential spread to adjacent cells
+                for neighbor in self.cell.neighbors:
+                    if neighbor.cell_type == CellType.LAND:
+                        if not any(p.type != PopulationType.TREES for p in neighbor.populations):
+                            neighbor.days_unused += 30
+                            if (neighbor.days_unused >= LAND_TO_FOREST_DAYS and
+                                neighbor.health_level > 80 and
+                                neighbor.resource_level > self.config.resource_regeneration_rates["forest"] and
+                                random.random() < FOREST_SPREAD_CHANCE):
+                                neighbor.cell_type = CellType.FOREST
+                                neighbor.days_unused = 0
+                    elif neighbor.cell_type == CellType.CITY:
+                        if neighbor.days_abandoned >= CITY_ABANDONMENT_DAYS:
+                            # Abandoned cities can be reclaimed by forest
+                            if random.random() < FOREST_SPREAD_CHANCE:
+                                neighbor.cell_type = CellType.FOREST
+                                neighbor.days_abandoned = 0
+            
+            yield self.env.timeout(30)  # Monthly growth check
+
     async def growth_cycle(self):
         while self.active:
             current_density = self.population.size
