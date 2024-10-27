@@ -63,7 +63,8 @@ class BasePopulationProcess:
             
             while self.active:
                 # Basic population mechanics
-                yield self.env.process(self.update_health(0))  # Base health change
+                for _ in self.update_health(0):  # Iterate through generator
+                    yield _
                 
                 # Check for population extinction
                 if self.population.size <= 0 or self.population.health_level <= 0:
@@ -84,8 +85,12 @@ class BasePopulationProcess:
         
         Args:
             amount: Health change amount (positive or negative)
+            
+        Yields:
+            simpy.Event: SimPy timeout event
         """
         self.population.health_level = max(0.0, min(100.0, self.population.health_level + amount))
+        yield self.env.timeout(0)  # Yield a timeout to make it a generator
 
 class HumanPopulation(BasePopulationProcess):
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
