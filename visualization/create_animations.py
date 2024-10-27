@@ -1,5 +1,5 @@
 import sys
-from grid_animator import GridAnimator
+from .grid_animator import GridAnimator
 
 def main():
     if len(sys.argv) != 2:

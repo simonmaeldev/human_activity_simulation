@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import LinearSegmentedColormap
-from cell import CellType
+from ..cell import CellType
 import glob
 
 class GridAnimator:
