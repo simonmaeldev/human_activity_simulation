@@ -98,7 +98,7 @@ class GridAnimator:
             grid = self._create_grid_frame(self.timesteps[frame])
             im = ax.imshow(grid, cmap=cmap, interpolation='nearest')
             ax.set_title(f'Simulation Step: {self.timesteps[frame]}')
-            progress_bar.update(1)
+            progress_bar.update()
             return [im]
             
         anim = FuncAnimation(fig, update, frames=len(self.timesteps),
@@ -111,27 +111,18 @@ class GridAnimator:
         """Create animation of pollution levels"""
         fig, ax = plt.subplots(figsize=(10, 10))
         
+        # Create custom colormap from white to black for pollution
+        pollution_cmap = LinearSegmentedColormap.from_list('pollution', ['white', 'black'])
+        
         progress_bar = tqdm(total=len(self.timesteps), desc="Creating pollution animation")
         
         def update(frame):
             ax.clear()
             pollution_grid = self._create_pollution_frame(self.timesteps[frame])
-            im = ax.imshow(pollution_grid, cmap='RdYlBu_r', interpolation='nearest')
-            
-            # Add CO2 level if available
-            if hasattr(self, 'global_metrics'):
-                co2_data = self.global_metrics[self.global_metrics['step'] == self.timesteps[frame]]
-                if not co2_data.empty:
-                    co2_level = co2_data['co2_level'].iloc[0]
-                    ax.set_title(f'Step: {self.timesteps[frame]} - CO2 Level: {co2_level:.2f}')
-                else:
-                    ax.set_title(f'Step: {self.timesteps[frame]}')
-            
-            # Create custom colormap from white to black for pollution
-            pollution_cmap = LinearSegmentedColormap.from_list('pollution', ['white', 'black'])
             im = ax.imshow(pollution_grid, cmap=pollution_cmap, interpolation='nearest', vmin=0, vmax=100)
+            ax.set_title(f'Simulation Step: {self.timesteps[frame]}')
             plt.colorbar(im, ax=ax, label='Air Pollution Level (%)')
-            progress_bar.update(1)
+            progress_bar.update()
             return [im]
             
         anim = FuncAnimation(fig, update, frames=len(self.timesteps),
