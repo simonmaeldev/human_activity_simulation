@@ -39,7 +39,10 @@ class BasePopulationProcess:
         self.cell = cell
         self.config = config
         self.active = True
-        self.process = None  # Don't start process immediately - let PopulationManager control this
+        self.process = None
+        self.work_cycle = None
+        self.growth_cycle = None
+        self.health_cycle = None
 
     def stop(self):
         """Gracefully stop this population process"""
@@ -77,14 +80,7 @@ class BasePopulationProcess:
 class HumanPopulation(BasePopulationProcess):
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
         super().__init__(env, population, cell, config)
-        # Initialize coroutines as None
-        self.work_cycle = None
-        self.growth_cycle = None 
-        self.health_cycle = None
         self.days_abandoned = 0  # Track how long a city has been below viable population
-        
-        # Start the main process
-        self.process = env.process(self.run())
 
     async def daily_cycle(self):
         """
@@ -354,7 +350,7 @@ class PopulationManager:
             # Create processes for new populations if needed
             for population in cell.populations:
                 if cell.position not in self.populations:
-                    self.add_population(population, cell)
+                    await self.add_population(population, cell)
             
             # Run population processes
             if cell.position in self.populations:
@@ -368,7 +364,7 @@ class PopulationManager:
             if self.resource_manager:
                 self.resource_manager.consume_resources(cell)
 
-    def add_population(self, population: Population, cell: Cell):
+    async def add_population(self, population: Population, cell: Cell):
         if cell.position not in self.populations:
             self.populations[cell.position] = []
 
@@ -380,6 +376,8 @@ class PopulationManager:
 
         if process_class:
             process = process_class(self.env, population, cell, self.config)
+            process.active = True
+            process.process = self.env.process(await process.run())
             self.populations[cell.position].append(process)
             
             # Create corresponding agent
