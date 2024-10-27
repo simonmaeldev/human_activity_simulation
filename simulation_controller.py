@@ -7,6 +7,11 @@ import os
 
 from environment import Environment
 from config_model import ConfigModel
+from resource_manager import ResourceManager
+from pollution_manager import PollutionManager
+from water_system import WaterSystem
+from population_processes import PopulationManager
+from data_collection.data_collector import DataCollector
 
 class SimulationController:
     """
