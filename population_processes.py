@@ -47,6 +47,12 @@ class BasePopulationProcess:
 
     async def run(self):
         """Base run method that implements basic population mechanics"""
+        if isinstance(self, HumanPopulation):
+            # Start human-specific processes
+            self.work_cycle = self.env.process(self.daily_cycle())
+            self.growth_cycle = self.env.process(self.growth_process())
+            self.health_cycle = self.env.process(self.health_update_process())
+            
         while self.active:
             # Basic population mechanics
             await self.update_health(0)  # Base health change
@@ -72,9 +78,13 @@ class BasePopulationProcess:
 class HumanPopulation(BasePopulationProcess):
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):
         super().__init__(env, population, cell, config)
-        self.work_cycle = env.process(self.daily_cycle())
-        self.growth_cycle = env.process(self.growth_process())
-        self.health_cycle = env.process(self.health_update_process())
+        # Start coroutines properly
+        self.work_cycle = None
+        self.growth_cycle = None 
+        self.health_cycle = None
+        
+        # Start processes when run() is called
+        self.process = env.process(self.run())
 
     async def daily_cycle(self):
         """
@@ -380,7 +390,7 @@ class PopulationManager:
 
         if process_class:
             process = process_class(self.env, population, cell, self.config)
-            self.populations[cell].append(process)
+            self.populations[cell.position].append(process)
             
             # Create corresponding agent
             agent_class = {
