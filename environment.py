@@ -104,22 +104,56 @@ class Environment:
                 neighbors.append(self.grid[nx][ny])
         return neighbors
 
-    def update_environment(self):
-        """Update environment state for one time step"""
-        # Update lake networks and balance water
-        self.resource_manager.water_system.update_lake_networks(self.grid)
-        self.resource_manager.water_system.balance_water_levels(self.grid)
+    def update_populations(self):
+        """
+        Update all population activities:
+        - Daily cycles (work, resource consumption)
+        - Growth and decline
+        - Health updates
+        """
+        self.population_manager.update_populations(self.grid)
         
+    def process_agent_decisions(self):
+        """
+        Process all agent decisions:
+        - Resource gathering locations
+        - Cell conversion decisions
+        - Movement choices
+        """
+        for cell in [cell for row in self.grid for cell in row]:
+            for population, agent in self.population_manager.agents.items():
+                if population in cell.populations:
+                    decisions = agent.make_decisions()
+                    if decisions:
+                        logging.info(f"Agent decisions for {population.type} in {cell.position}: {decisions}")
+                        
+    def update_environmental_processes(self):
+        """
+        Update environmental processes:
+        - Pollution spread through air
+        - Water flow and pollution in water systems
+        - Resource transfer between cells
+        """
         # Handle pollution spread
         self.pollution_manager.spread_pollution(self.grid)
+        
+        # Update water systems (now only in resource_manager)
+        self.resource_manager.water_system.update_lake_networks(self.grid)
+        self.resource_manager.water_system.balance_water_levels(self.grid)
         self.resource_manager.water_system.spread_water_pollution(self.grid)
         
-        # Regenerate resources
+    def regenerate_resources(self):
+        """
+        Handle resource regeneration:
+        - Natural resource regeneration
+        - Resource quality updates
+        """
         for row in self.grid:
             for cell in row:
                 self.resource_manager.regenerate_resources(cell)
-        
-        # Collect data
+                
+    def collect_daily_data(self):
+        """Collect all simulation data for the current day"""
         current_step = self.env.now
         self.data_collector.collect_global_metrics(self)
         for row in self.grid:

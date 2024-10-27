@@ -37,7 +37,6 @@ class SimulationController:
         # Initialize managers
         self.resource_manager = ResourceManager(config, self.grid)
         self.pollution_manager = PollutionManager(config)
-        self.water_system = WaterSystem()
         
         # Initialize population manager last so it has access to other systems
         self.population_manager = PopulationManager(self.env, config)
@@ -78,6 +77,13 @@ class SimulationController:
         """
         Run the simulation for specified duration.
         
+        The simulation follows this order each day:
+        1. Population activities (consumption, movement, growth)
+        2. Agent decisions (resource gathering, cell conversion)
+        3. Environmental processes (pollution spread, water flow)
+        4. Resource regeneration
+        5. Data collection
+        
         Args:
             duration: Number of simulation days to run
             
@@ -90,15 +96,31 @@ class SimulationController:
         try:
             # Run for specified duration
             for day in range(duration):
-                # Update environment state
-                self.environment.update_environment()
+                logging.info(f"Starting day {day}")
+                
+                # 1. Update all population activities
+                self.environment.update_populations()
+                
+                # 2. Process agent decisions
+                self.environment.process_agent_decisions()
+                
+                # 3. Update environmental processes
+                self.environment.update_environmental_processes()
+                
+                # 4. Regenerate resources
+                self.environment.regenerate_resources()
+                
+                # 5. Collect data
+                self.environment.collect_daily_data()
                 
                 # Process SimPy events for one day
-                self.environment.env.run(until=day + 1)
+                self.env.run(until=day + 1)
                 
                 # Log progress every week
                 if day % 7 == 0:
                     logging.info(f"Simulation progress: Day {day}/{duration}")
+                    stats = self.get_statistics()
+                    logging.info(f"Current statistics: {stats}")
 
             # Export final data
             export_results = self.environment.export_simulation_data()
