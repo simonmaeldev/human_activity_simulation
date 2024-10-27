@@ -48,17 +48,17 @@ class BasePopulationProcess:
         """Gracefully stop this population process"""
         self.active = False
 
-    async def run(self):
+    def run(self):
         """Base run method that implements basic population mechanics"""
         try:
             # Start the coroutines properly and store their tasks
-            self.work_cycle = self.env.process(await self.daily_cycle())
-            self.growth_cycle = self.env.process(await self.growth_process())
-            self.health_cycle = self.env.process(await self.health_update_process())
+            self.work_cycle = self.env.process(self.daily_cycle())
+            self.growth_cycle = self.env.process(self.growth_process())
+            self.health_cycle = self.env.process(self.health_update_process())
             
             while self.active:
                 # Basic population mechanics
-                await self.update_health(0)  # Base health change
+                yield self.env.process(self.update_health(0))  # Base health change
                 
                 # Check for population extinction
                 if self.population.size <= 0 or self.population.health_level <= 0:
@@ -67,7 +67,7 @@ class BasePopulationProcess:
                         self.cell.populations.remove(self.population)
                     break
                 
-                await self.env.timeout(1)  # Wait one day
+                yield self.env.timeout(1)  # Wait one day
                 
         except Exception as e:
             logging.error(f"Error in population process: {str(e)}")
@@ -87,7 +87,7 @@ class HumanPopulation(BasePopulationProcess):
         super().__init__(env, population, cell, config)
         self.days_abandoned = 0  # Track how long a city has been below viable population
 
-    async def daily_cycle(self):
+    def daily_cycle(self):
         """
         Simulates daily human activities including:
         - Work commuting and associated pollution generation
@@ -110,7 +110,7 @@ class HumanPopulation(BasePopulationProcess):
                                        self.population.size)
             
             # Wait for next day
-            await self.env.timeout(1)  # One step = one day
+            yield self.env.timeout(1)  # One step = one day
 
     async def growth_process(self):
         """
@@ -369,7 +369,7 @@ class PopulationManager:
             if self.resource_manager:
                 self.resource_manager.consume_resources(cell)
 
-    async def add_population(self, population: Population, cell: Cell):
+    def add_population(self, population: Population, cell: Cell):
         if cell.position not in self.populations:
             self.populations[cell.position] = []
 
@@ -382,7 +382,7 @@ class PopulationManager:
         if process_class:
             process = process_class(self.env, population, cell, self.config)
             process.active = True
-            process.process = self.env.process(await process.run())
+            process.process = self.env.process(process.run())
             self.populations[cell.position].append(process)
             
             # Create corresponding agent
