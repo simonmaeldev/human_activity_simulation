@@ -28,23 +28,7 @@ class ResourceManager:
         }
 
     def consume_resources(self, cell: Cell) -> Dict[Population, float]:
-        """
-        Handles resource consumption with priority system.
-        
-        This is a critical function that:
-        1. Sorts populations by priority (humans first)
-        2. Allocates resources based on need and availability
-        3. Ensures higher priority populations get resources first
-        4. Returns exactly how much each population consumed
-        
-        Returns:
-            Dict[Population, float]: Maps each population to amount of resources they received
-        
-        Design choices:
-        - Priority system prevents resource conflicts
-        - Returns consumption data for tracking/statistics
-        - Handles resource scarcity gracefully
-        """
+        """Handle resource consumption with priority system"""
         consumption_results = {}
         available_resources = cell.resource_level
         
@@ -58,8 +42,13 @@ class ResourceManager:
             needed = population.resource_consumption_rate * population.size
             consumed = min(needed, available_resources)
             consumption_results[population] = consumed
-            available_resources -= consumed
             
+            # Transfer proportional pollution with consumed resources
+            if consumed > 0:
+                pollution_transfer = (consumed / cell.resource_level) * cell.ground_pollution_level
+                cell.ground_pollution_level -= pollution_transfer
+            
+            available_resources -= consumed
             if available_resources <= 0:
                 break
                 
@@ -67,26 +56,73 @@ class ResourceManager:
         return consumption_results
 
     def regenerate_resources(self, cell: Cell):
-        """
-        Regenerates resources in a cell based on multiple factors.
-        
-        This function models natural resource regeneration by:
-        1. Using base regeneration rate specific to cell type (forests regenerate faster than cities)
-        2. Scaling by cell health (damaged cells regenerate slower)
-        3. Reducing regeneration based on pollution (polluted areas recover slower)
-        4. Capping resources at 100% to prevent overflow
-        
-        Design choices:
-        - Multiplicative factors rather than additive to model compound effects
-        - Cell type specific rates allow fine-tuning of different biomes
-        - Resource cap prevents unrealistic accumulation
-        """
-        base_rate = self.config.resource_regeneration_rates[cell.cell_type.value]
+        """Handle resource regeneration based on cell type"""
+        if cell.cell_type == CellType.LAKE:
+            self._regenerate_lake_resources(cell)
+        elif cell.cell_type == CellType.LAND:
+            self._regenerate_land_resources(cell)
+        elif cell.cell_type == CellType.FOREST:
+            self._regenerate_forest_resources(cell)
+            
+    def _regenerate_lake_resources(self, cell: Cell):
+        """Handle lake water regeneration"""
+        base_rate = self.config.resource_regeneration_rates["lake"]
         health_factor = cell.health_level / 100
-        pollution_factor = 1 - (cell.current_pollution_level / 100)
-        
-        regeneration = base_rate * health_factor * pollution_factor
+        regeneration = base_rate * health_factor
         cell.resource_level = min(100, cell.resource_level + regeneration)
+        
+    def _regenerate_land_resources(self, cell: Cell):
+        """Handle land food production with irrigation effects"""
+        base_rate = self.config.resource_regeneration_rates["land"]
+        health_factor = cell.health_level / 100
+        
+        # Find adjacent lake for irrigation
+        adjacent_lake = self._find_adjacent_lake(cell)
+        if adjacent_lake and adjacent_lake.resource_level > 20:  # Minimum water needed
+            # Use water for irrigation
+            water_used = min(20, adjacent_lake.resource_level)
+            adjacent_lake.resource_level -= water_used
+            
+            # Irrigation helps clean pollution
+            pollution_cleaned = water_used * 0.1  # 10% cleaning rate
+            cell.ground_pollution_level = max(0, cell.ground_pollution_level - pollution_cleaned)
+            
+            # Bonus to food production from irrigation
+            regeneration = base_rate * health_factor * 1.5  # 50% bonus
+        else:
+            regeneration = base_rate * health_factor
+            
+        cell.resource_level = min(100, cell.resource_level + regeneration)
+        
+    def _regenerate_forest_resources(self, cell: Cell):
+        """Handle forest resource regeneration with water consumption"""
+        base_rate = self.config.resource_regeneration_rates["forest"]
+        health_factor = cell.health_level / 100
+        
+        # Find adjacent lake for water
+        adjacent_lake = self._find_adjacent_lake(cell)
+        if adjacent_lake and adjacent_lake.resource_level > 10:  # Minimum water needed
+            water_used = min(10, adjacent_lake.resource_level)
+            adjacent_lake.resource_level -= water_used
+            regeneration = base_rate * health_factor
+        else:
+            regeneration = base_rate * health_factor * 0.5  # 50% penalty without water
+            
+        cell.resource_level = min(100, cell.resource_level + regeneration)
+        
+    def _find_adjacent_lake(self, cell: Cell) -> Optional[Cell]:
+        """Find an adjacent lake cell if one exists"""
+        if not hasattr(cell, 'position'):
+            return None
+            
+        x, y = cell.position
+        for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+            nx, ny = x + dx, y + dy
+            # Need to access grid through environment - this needs to be passed in
+            if (0 <= nx < len(self.grid) and 0 <= ny < len(self.grid[0]) and 
+                self.grid[nx][ny].cell_type == CellType.LAKE):
+                return self.grid[nx][ny]
+        return None
 
     def transfer_resources(self, source: Cell, target: Cell, amount: float):
         """
