@@ -369,7 +369,7 @@ class PopulationManager:
             if self.resource_manager:
                 self.resource_manager.consume_resources(cell)
 
-    def add_population(self, population: Population, cell: Cell):
+    async def add_population(self, population: Population, cell: Cell):
         if cell.position not in self.populations:
             self.populations[cell.position] = []
 
