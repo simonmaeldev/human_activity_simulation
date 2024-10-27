@@ -208,13 +208,18 @@ class TreePopulation(BasePopulationProcess):
         self.process = env.process(self.run())
 
     async def co2_absorption_process(self):
+        """Process CO2 absorption by trees through the environment's pollution manager"""
         while self.active:
             # CO2 absorption rate based on health and pollution
             absorption_rate = (self.population.size * TREE_CO2_ABSORPTION_FACTOR * 
                              (self.population.health_level / 100) * 
                              (1 - self.cell.current_pollution_level / 100))
             
-            self.cell.global_co2_level -= absorption_rate
+            # Use environment's pollution manager to reduce CO2
+            from environment import Environment
+            env = Environment._instance
+            env.pollution_manager.reduce_co2(absorption_rate)
+            
             await self.env.timeout(1)
 
     async def growth_cycle(self):
