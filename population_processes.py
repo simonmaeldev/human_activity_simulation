@@ -352,6 +352,39 @@ class WildlifePopulation(BasePopulationProcess):
         super().__init__(env, population, cell, config)
         self.process = env.process(self.run())
 
+    async def health_update_process(self):
+        """
+        Update wildlife population health based on:
+        - Resource quality (pollution levels)
+        - Available food sources
+        - Environmental conditions
+        """
+        while self.active:
+            # Base health decline from natural causes
+            health_change = -WILDLIFE_BASE_HEALTH_DECLINE
+            
+            # Calculate health impact from pollution
+            pollution_impact = (
+                AIR_POLLUTION_HEALTH_IMPACT * self.cell.air_pollution_level +
+                GROUND_POLLUTION_HEALTH_IMPACT * self.cell.ground_pollution_level
+            )
+            
+            # Bonus from being in natural habitat
+            if self.cell.cell_type == CellType.FOREST:
+                health_change += NATURE_PROXIMITY_BONUS
+            
+            # Resource quality impact
+            consumed_resources = min(
+                self.cell.resource_level,
+                self.population.resource_consumption_rate * self.population.size
+            )
+            if consumed_resources > 0:
+                quality_factor = 1 - (self.cell.current_pollution_level / 100)
+                health_change += (consumed_resources / self.population.size) * quality_factor
+            
+            await self.update_health(health_change)
+            await self.env.timeout(1)
+
     def resource_consumption_process(self):
         """
         Manages wildlife resource consumption and related health impacts.
