@@ -109,7 +109,7 @@ class GridAnimator:
             
             # Add CO2 level if available
             if hasattr(self, 'global_metrics'):
-                co2_data = self.global_metrics[self.global_metrics['timestamp'] == self.timesteps[frame]]
+                co2_data = self.global_metrics[self.global_metrics['step'] == self.timesteps[frame]]
                 if not co2_data.empty:
                     co2_level = co2_data['co2_level'].iloc[0]
                     ax.set_title(f'Step: {self.timesteps[frame]} - CO2 Level: {co2_level:.2f}')

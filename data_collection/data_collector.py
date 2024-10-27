@@ -28,7 +28,7 @@ class DataCollector:
             for pop in cell.populations
         )
         metrics = {
-            'timestamp': timestamp,
+            'step': environment.env.now,
             'co2_level': environment.pollution_manager.get_current_co2(),
             'total_population': total_population,
             'average_pollution': sum(
