@@ -21,6 +21,10 @@ class Environment:
         self.csv_exporter = CSVExporter()
 
     def _initialize_grid(self, grid_size: Tuple[int, int]) -> List[List[Cell]]:
+        # Use config's random seed if provided
+        if hasattr(self.config, 'random_seed') and self.config.random_seed is not None:
+            random.seed(self.config.random_seed)
+            
         cell_types = {
             CellType.CITY: CityCell,
             CellType.FOREST: ForestCell,
@@ -28,10 +32,16 @@ class Environment:
             CellType.LAND: LandCell
         }
         
-        return [[
+        grid = [[
             cell_types[random.choice(list(CellType))](position=(x, y))
             for y in range(grid_size[1])
         ] for x in range(grid_size[0])]
+        
+        # Reset random state if seed was used
+        if hasattr(self.config, 'random_seed') and self.config.random_seed is not None:
+            random.seed()
+            
+        return grid
 
     def get_neighbors(self, x: int, y: int) -> List[Cell]:
         neighbors = []

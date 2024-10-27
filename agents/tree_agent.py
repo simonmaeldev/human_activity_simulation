@@ -33,8 +33,13 @@ class TreeAgent(BaseAgent):
     def _try_spread(self) -> bool:
         """Attempt to spread to neighboring land"""
         for neighbor in self.cell.neighbors:
+            # Use seeded random if available
+            rand_val = (random.Random(self.config.random_seed).random() 
+                       if hasattr(self.config, 'random_seed') and self.config.random_seed is not None
+                       else random.random())
+            
             if (neighbor.cell_type == CellType.LAND and
-                random.random() < FOREST_SPREAD_CHANCE and
+                rand_val < FOREST_SPREAD_CHANCE and
                 self.evaluate_cell_quality(neighbor) > 0.5):
                 neighbor.cell_type = CellType.FOREST
                 logging.info(

@@ -4,8 +4,8 @@ import logging
 import traceback
 
 def main():
-    # Create simulation configuration
-    config = ConfigModel(grid_size=(10,10))
+    # Create simulation configuration with fixed seed for reproducibility
+    config = ConfigModel(grid_size=(10,10), random_seed=42)
     
     # Initialize simulation controller
     controller = SimulationController(config)
