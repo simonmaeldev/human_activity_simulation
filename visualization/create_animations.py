@@ -12,9 +12,9 @@ def main():
     try:
         animator = GridAnimator(data_dir)
         print("Creating grid animation...")
-        #animator.animate_grid()
+        animator.animate_grid(output_file=f"{data_dir}/grid_animation.mp4")
         print("Creating pollution animation...")
-        animator.animate_pollution()
+        animator.animate_pollution(output_file=f"{data_dir}/pollution_animation.mp4")
         print("Animations created successfully!")
         return 0
     except Exception as e:
