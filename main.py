@@ -22,6 +22,7 @@ def main():
         
     except Exception as e:
         logging.error(f"Simulation failed: {str(e)}")
+        logging.error(f"Traceback:\n{traceback.format_exc()}")
         return 1
     
     return 0
