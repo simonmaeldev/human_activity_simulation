@@ -131,4 +131,4 @@ class Environment:
 
     def export_simulation_data(self) -> Dict[str, str]:
         """Export all collected data to CSV files"""
-        return self.csv_exporter.export_all(self.data_collector)
+        return self.csv_exporter.export_all(self.data_collector, self.config)
