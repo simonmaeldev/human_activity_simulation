@@ -49,6 +49,13 @@ class Cell(BaseModel):
             return NotImplemented
         return self.position == other.position
 
+    @property
+    def neighbors(self):
+        """Get list of neighboring cells from the grid"""
+        from environment import Environment
+        env = Environment._instance  # Access singleton instance
+        return env.get_neighbors(*self.position)
+
 class CityCell(Cell):
     """Specialized cell type for cities"""
     def __init__(self, **data):

@@ -13,7 +13,10 @@ from population import Population, PopulationType
 from constants import MAX_HUMAN_DENSITY, MAX_TREE_DENSITY
 
 class Environment:
+    _instance = None  # Singleton instance
+    
     def __init__(self, config: ConfigModel):
+        Environment._instance = self  # Store singleton instance
         self.config = config  # Store config first so it's available for _initialize_grid
         self.env = simpy.Environment()
         self.grid = self._initialize_grid(config.grid_size)
