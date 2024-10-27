@@ -45,11 +45,11 @@ class Environment:
         """Update environment state for one time step"""
         # Update lake networks and balance water
         self.resource_manager.water_system.update_lake_networks(self.grid)
-        self.resource_manager.water_system.balance_water_levels()
+        self.resource_manager.water_system.balance_water_levels(self.grid)
         
         # Handle pollution spread
         self.pollution_manager.spread_pollution(self.grid)
-        self.resource_manager.water_system.spread_water_pollution()
+        self.resource_manager.water_system.spread_water_pollution(self.grid)
         
         # Regenerate resources
         for row in self.grid:
