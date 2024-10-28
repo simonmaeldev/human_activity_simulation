@@ -4,7 +4,7 @@ from city import City
 from forest import Forest
 from cell import Cell
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 class Environment(BaseModel):
     env: simpy.Environment
@@ -12,7 +12,7 @@ class Environment(BaseModel):
     width: int = Field(gt=0)
     height: int = Field(gt=0)
     cells: List[List[Cell]] = Field(default_factory=list)
-    process: simpy.Process
+    process: Optional[simpy.Process] = None
 
     class Config:
         arbitrary_types_allowed = True
