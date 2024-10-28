@@ -1,3 +1,5 @@
+import simpy
+from pydantic import Field
 from .base_agent import BaseAgent
 
 class HumanAgent(BaseAgent):
@@ -5,10 +7,7 @@ class HumanAgent(BaseAgent):
     Agent representing a human individual in the simulation.
     Makes decisions about resource consumption and movement.
     """
-    
-    def __init__(self, env: simpy.Environment):
-        super().__init__(env)
-        self.resources = 100  # Starting resources
+    resources: float = Field(default=100)  # Starting resources
         
     async def run(self):
         while True:

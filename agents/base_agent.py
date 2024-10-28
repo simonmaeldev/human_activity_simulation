@@ -1,23 +1,22 @@
-from abc import ABC, abstractmethod
 from typing import Optional
 import simpy
+from pydantic import BaseModel
 
-class BaseAgent(ABC):
+class BaseAgent(BaseModel):
     """
-    Abstract base class for all agents in the simulation.
+    Base class for all agents in the simulation.
     Defines core agent behaviors and decision-making interface.
     """
+    env: simpy.Environment
+    process: Optional[simpy.Process] = None
+
+    class Config:
+        arbitrary_types_allowed = True
     
-    def __init__(self, env: simpy.Environment):
-        self.env = env
-        self.process: Optional[simpy.Process] = None
-        
-    @abstractmethod
     async def run(self):
         """Main behavior loop for the agent"""
-        pass
+        raise NotImplementedError
     
-    @abstractmethod
     def make_decision(self):
         """Make a decision based on current environment state"""
-        pass
+        raise NotImplementedError
