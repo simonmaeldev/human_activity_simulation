@@ -3,11 +3,11 @@ import random
 from pydantic import BaseModel, Field
 from typing import Optional, ForwardRef
 
-GlobalEnvironment = ForwardRef('GlobalEnvironment')
+Environment = ForwardRef('Environment')
 
 class Cell(BaseModel):
     env: simpy.Environment
-    global_env: 'GlobalEnvironment'
+    environment: 'Environment'
     x: int = Field(ge=0)
     y: int = Field(ge=0)
     population: int = Field(default_factory=lambda: random.randint(1, 100))

@@ -6,5 +6,5 @@ class Forest(Cell):
 
     def process_environment(self):
         absorption = self.population * self.absorption_rate
-        self.global_env.global_co2_level = max(0, self.global_env.global_co2_level - absorption)
-        print(f"Week {self.env.now}: Forest at ({self.x}, {self.y}) absorbed {absorption:.2f} CO2. Global CO2: {self.global_env.global_co2_level:.2f}")
+        self.environment.global_co2_level = max(0, self.environment.global_co2_level - absorption)
+        print(f"Week {self.env.now}: Forest at ({self.x}, {self.y}) absorbed {absorption:.2f} CO2. Global CO2: {self.environment.global_co2_level:.2f}")
