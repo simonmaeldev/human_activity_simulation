@@ -203,8 +203,8 @@ class HumanPopulation(BasePopulationProcess):
             nature_bonus = sum(1 for neighbor in self.cell.neighbors 
                              if neighbor.cell_type in [CellType.FOREST, CellType.LAKE]) * NATURE_PROXIMITY_BONUS
             
-            await self.update_health(pollution_impact + nature_bonus)
-            await self.env.timeout(1)
+            self.update_health(pollution_impact + nature_bonus)
+            yield self.env.timeout(1)
 
 class TreePopulation(BasePopulationProcess):
     def __init__(self, env: simpy.Environment, population: Population, cell: Cell, config: ConfigModel):

@@ -1,7 +1,7 @@
 import simpy
 import random
 import logging
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Dict, Any
 from cell import Cell, CellType, CityCell, ForestCell, LakeCell, LandCell
 from config_model import ConfigModel
 from population_processes import PopulationManager
@@ -30,6 +30,7 @@ class Environment:
         self.pollution_manager = PollutionManager(config)
         self.data_collector = DataCollector()
         self.csv_exporter = CSVExporter(config.simulation_dir if hasattr(config, 'simulation_dir') else None)
+        self.action = self.env.process(self.run())
 
     def _initialize_grid(self, grid_size: Tuple[int, int]) -> List[List[Cell]]:
         # Use config's random seed if provided
@@ -105,6 +106,22 @@ class Environment:
             
         return grid
 
+    def run(self):
+        while True:
+            self.update_populations()
+            self.process_agent_decisions()
+            self.update_environmental_processes()
+            self.regenerate_resources()
+            self.collect_daily_data()
+            # Log progress every week
+            day = self.env.now
+            if day % 7 == 0:
+                logging.info(f"Simulation progress: Day {day}/{self.config.duration}")
+                stats = self.get_statistics()
+                logging.info(f"Current statistics: {stats}")
+
+            yield self.env.timeout(1)
+
     def get_neighbors(self, x: int, y: int) -> List[Cell]:
         neighbors = []
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
@@ -175,3 +192,22 @@ class Environment:
     def export_simulation_data(self) -> Dict[str, str]:
         """Export all collected data to CSV files"""
         return self.csv_exporter.export_all(self.data_collector, self.config)
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """
+        Get current simulation statistics.
+        
+        Returns:
+            Dict containing current simulation metrics
+        """
+
+        return {
+            'current_time': self.env.now,
+            'global_co2': self.pollution_manager.get_current_co2(),
+            'total_population': sum(
+                pop.size
+                for row in self.grid
+                for cell in row
+                for pop in cell.populations
+            )
+        }
