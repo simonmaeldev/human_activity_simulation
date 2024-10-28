@@ -17,7 +17,7 @@ class Cell(BaseModel):
         super().__init__(**data)
         self.process = self.env.process(self.run())
 
-    async def run(self):
+    def run(self):
         while True:
             yield self.env.timeout(1)  # Wait for a week
 
