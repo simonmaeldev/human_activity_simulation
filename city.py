@@ -2,6 +2,7 @@ from cell import Cell
 from pydantic import Field
 
 class City(Cell):
+    model_rebuild()
     emission_rate: float = Field(default=0.1, description="CO2 emission per person per week")
 
     def process_environment(self):

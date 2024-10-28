@@ -1,7 +1,10 @@
 import simpy
 import random
 from pydantic import BaseModel, Field
-from typing import Optional, ForwardRef
+from typing import Optional, ForwardRef, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from environment import Environment
 
 Environment = ForwardRef('Environment')
 
@@ -28,3 +31,6 @@ class Cell(BaseModel):
     def process_environment(self):
         """Each cell type must implement its environmental impact"""
         raise NotImplementedError
+
+from environment import Environment
+Cell.model_rebuild()
