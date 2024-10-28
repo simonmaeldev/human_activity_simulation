@@ -1,6 +1,6 @@
 import simpy
 import random
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from agents.base_agent import BaseAgent
 
@@ -13,8 +13,9 @@ class Cell(BaseModel):
     agents: List["BaseAgent"] = Field(default_factory=list)
     process: Optional[simpy.events.Process] = None
 
-    @validator('air_pollution', 'ground_pollution')
-    def validate_pollution(cls, v):
+    @field_validator('air_pollution', 'ground_pollution')
+    @classmethod
+    def validate_pollution(cls, v: float) -> float:
         return max(0.0, v)
 
     class Config:
