@@ -9,7 +9,7 @@ class HumanAgent(BaseAgent):
     """
     resources: float = Field(default=100)  # Starting resources
         
-    async def run(self):
+    def run(self):
         while True:
             self.make_decision()
             yield self.env.timeout(1)  # Wait one time step

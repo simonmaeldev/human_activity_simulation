@@ -9,7 +9,7 @@ class TreeAgent(BaseAgent):
     """
     height: float = Field(default=1)  # Starting height in meters
         
-    async def run(self):
+    def run(self):
         while True:
             self.make_decision()
             yield self.env.timeout(1)  # Wait one time step

@@ -14,7 +14,7 @@ class BaseAgent(BaseModel):
     class Config:
         arbitrary_types_allowed = True
     
-    async def run(self):
+    def run(self):
         """Main behavior loop for the agent"""
         while True:
             self.make_decision()
