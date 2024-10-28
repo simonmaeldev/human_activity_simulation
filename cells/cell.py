@@ -39,5 +39,5 @@ class Cell(BaseModel):
             yield self.env.timeout(1)  # Wait for a week
 
     def calculate_co2_impact(self) -> float:
-        """Calculate how much CO2 this cell produces (positive) or absorbs (negative)"""
-        raise NotImplementedError
+        """Calculate total CO2 impact from all agents in the cell"""
+        return sum(agent.calculate_co2_impact() for agent in self.agents)
