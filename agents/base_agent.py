@@ -17,16 +17,6 @@ class BaseAgent(BaseModel):
     async def run(self):
         """Main behavior loop for the agent"""
         while True:
-            # Update health based on local pollution
-            if hasattr(self, 'cell') and self.cell:
-                pollution_impact = self.cell.co2_level / 1000  # Scale factor for pollution impact
-                self.health = max(0.0, min(1.0, self.health - pollution_impact))
-                
-                # Agent dies if health reaches 0
-                if self.health <= 0:
-                    print(f"{self.__class__.__name__} died due to pollution")
-                    return
-                
             self.make_decision()
             yield self.env.timeout(1)
     
