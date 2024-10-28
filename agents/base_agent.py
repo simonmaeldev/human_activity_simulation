@@ -28,3 +28,11 @@ class BaseAgent(BaseModel):
     def calculate_co2_impact(self) -> float:
         """Calculate how much CO2 this agent produces (positive) or absorbs (negative)"""
         raise NotImplementedError
+        
+    def calculate_air_pollution_impact(self) -> float:
+        """Calculate how much air pollution this agent produces (positive) or removes (negative)"""
+        raise NotImplementedError
+        
+    def calculate_ground_pollution_impact(self) -> float:
+        """Calculate how much ground pollution this agent produces (positive) or removes (negative)"""
+        raise NotImplementedError

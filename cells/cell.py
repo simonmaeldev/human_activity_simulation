@@ -41,3 +41,11 @@ class Cell(BaseModel):
     def calculate_co2_impact(self) -> float:
         """Calculate total CO2 impact from all agents in the cell"""
         return sum(agent.calculate_co2_impact() for agent in self.agents)
+        
+    def calculate_air_pollution_impact(self) -> float:
+        """Calculate total air pollution impact from all agents in the cell"""
+        return sum(agent.calculate_air_pollution_impact() for agent in self.agents)
+        
+    def calculate_ground_pollution_impact(self) -> float:
+        """Calculate total ground pollution impact from all agents in the cell"""
+        return sum(agent.calculate_ground_pollution_impact() for agent in self.agents)
