@@ -10,8 +10,7 @@ class BaseAgent(BaseModel):
     env: simpy.Environment
     process: Optional[simpy.Process] = None
     health: float = Field(default=1.0, ge=0.0, le=1.0)  # Health level between 0 and 1
-    initial_population: int = Field(default=1)  # Initial number of individuals
-    population: int = Field(default=None)  # Current number of individuals 
+    population: int = Field(default=1)  # Current number of individuals 
 
     class Config:
         arbitrary_types_allowed = True
