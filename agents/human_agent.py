@@ -7,8 +7,6 @@ class HumanAgent(BaseAgent):
     Agent representing a human individual in the simulation.
     Makes decisions about resource consumption and movement.
     """
-    resources: float = Field(default=100)  # Starting resources
-        
     def run(self):
         while True:
             self.make_decision()
