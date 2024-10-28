@@ -2,6 +2,7 @@ import simpy
 import random
 from city import City
 from forest import Forest
+from cell import Cell
 from pydantic import BaseModel, Field
 
 class GlobalEnvironment(BaseModel):

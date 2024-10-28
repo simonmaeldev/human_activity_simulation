@@ -1,7 +1,9 @@
 import simpy
 import random
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, ForwardRef
+
+GlobalEnvironment = ForwardRef('GlobalEnvironment')
 
 class Cell(BaseModel):
     env: simpy.Environment
