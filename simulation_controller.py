@@ -66,13 +66,6 @@ class SimulationController:
             ]
         )
 
-    def initialize_simulation(self) -> None:
-        """
-        Set up initial simulation state.
-        Initializes simulation components.
-        """
-        logging.info("Initializing simulation...")
-
     async def run(self, duration: int) -> Dict[str, Any]:
         """
         Run the simulation for specified duration.
@@ -90,7 +83,6 @@ class SimulationController:
         Returns:
             Dict containing simulation results and statistics
         """
-        self.initialize_simulation()
         logging.info(f"Starting simulation for {duration} days")
 
         try:
