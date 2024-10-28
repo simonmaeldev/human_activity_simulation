@@ -36,6 +36,14 @@ class Cell(BaseModel):
 
     def run(self):
         while True:
+            # Update local pollution levels based on agent impacts
+            air_impact = self.calculate_air_pollution_impact()
+            ground_impact = self.calculate_ground_pollution_impact()
+            
+            # Update pollution levels with impacts, ensuring they don't go below 0
+            self.air_pollution = max(0.0, self.air_pollution + air_impact)
+            self.ground_pollution = max(0.0, self.ground_pollution + ground_impact)
+            
             yield self.env.timeout(1)  # Wait for a week
 
     def calculate_co2_impact(self) -> float:
