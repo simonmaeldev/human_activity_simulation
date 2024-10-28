@@ -12,6 +12,7 @@ class Environment(BaseModel):
     width: int = Field(gt=0)
     height: int = Field(gt=0)
     cells: List[List[Cell]] = Field(default_factory=list)
+    process: simpy.Process
 
     class Config:
         arbitrary_types_allowed = True
@@ -25,7 +26,7 @@ class Environment(BaseModel):
         cell_class = random.choice([City, Forest])
         return cell_class(env=self.env, x=x, y=y)
 
-    async def run(self):
+    def run(self):
         while True:
             self.update_co2_levels()
             yield self.env.timeout(1)
