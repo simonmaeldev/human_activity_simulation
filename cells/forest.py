@@ -1,4 +1,4 @@
-from cell import Cell
+from .cell import Cell
 from pydantic import Field
 
 class Forest(Cell):

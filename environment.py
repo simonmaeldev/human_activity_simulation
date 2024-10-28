@@ -1,8 +1,6 @@
 import simpy
 import random
-from city import City
-from forest import Forest
-from cell import Cell
+from cells import Cell, City, Forest
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
