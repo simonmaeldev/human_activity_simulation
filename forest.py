@@ -2,8 +2,9 @@ from cell import Cell
 from pydantic import Field
 
 class Forest(Cell):
-    model_rebuild()
     absorption_rate: float = Field(default=0.2, description="CO2 absorption per tree per week")
+
+Forest.model_rebuild()
 
     def process_environment(self):
         absorption = self.population * self.absorption_rate
