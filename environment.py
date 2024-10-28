@@ -32,9 +32,13 @@ class Environment(BaseModel):
             yield self.env.timeout(1)
 
     def update_co2_levels(self):
+        total_impact = 0
         for row in self.cells:
             for cell in row:
                 impact = cell.calculate_co2_impact()
-                self.global_co2_level = max(0, self.global_co2_level + impact)
+                total_impact += impact
                 cell_type = "City" if isinstance(cell, City) else "Forest"
-                print(f"Week {self.env.now}: {cell_type} at ({cell.x}, {cell.y}) CO2 impact: {impact:.2f}. Global CO2: {self.global_co2_level:.2f}")
+                print(f"Week {self.env.now}: {cell_type} at ({cell.x}, {cell.y}) CO2 impact: {impact:.2f}")
+        
+        self.global_co2_level = max(0, self.global_co2_level + total_impact)
+        print(f"Week {self.env.now}: Total CO2 impact: {total_impact:.2f}. Global CO2: {self.global_co2_level:.2f}")
