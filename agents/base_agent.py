@@ -24,3 +24,7 @@ class BaseAgent(BaseModel):
     def make_decision(self):
         """Make a decision based on current environment state"""
         raise NotImplementedError
+        
+    def calculate_co2_impact(self) -> float:
+        """Calculate how much CO2 this agent produces (positive) or absorbs (negative)"""
+        raise NotImplementedError

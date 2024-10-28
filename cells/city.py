@@ -1,8 +1,6 @@
 from .cell import Cell
-from pydantic import Field
 
 class City(Cell):
-    emission_rate: float = Field(default=0.1, description="CO2 emission per person per week")
-
     def calculate_co2_impact(self) -> float:
-        return self.population * self.emission_rate
+        """Calculate total CO2 impact from all agents in the city cell"""
+        return sum(agent.calculate_co2_impact() for agent in self.agents)
