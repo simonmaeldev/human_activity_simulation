@@ -19,7 +19,21 @@ class Environment(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         self.cells = [[self.create_cell(x, y) for y in range(self.height)] for x in range(self.width)]
+        self.process = self.env.process(self.run())
 
     def create_cell(self, x: int, y: int) -> Cell:
         cell_class = random.choice([City, Forest])
-        return cell_class(env=self.env, environment=self, x=x, y=y)
+        return cell_class(env=self.env, x=x, y=y)
+
+    async def run(self):
+        while True:
+            self.update_co2_levels()
+            yield self.env.timeout(1)
+
+    def update_co2_levels(self):
+        for row in self.cells:
+            for cell in row:
+                impact = cell.calculate_co2_impact()
+                self.global_co2_level = max(0, self.global_co2_level + impact)
+                cell_type = "City" if isinstance(cell, City) else "Forest"
+                print(f"Week {self.env.now}: {cell_type} at ({cell.x}, {cell.y}) CO2 impact: {impact:.2f}. Global CO2: {self.global_co2_level:.2f}")

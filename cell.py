@@ -1,16 +1,10 @@
 import simpy
 import random
 from pydantic import BaseModel, Field
-from typing import Optional, ForwardRef, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from environment import Environment
-
-Environment = ForwardRef('Environment')
+from typing import Optional
 
 class Cell(BaseModel):
     env: simpy.Environment
-    environment: 'Environment'
     x: int = Field(ge=0)
     y: int = Field(ge=0)
     population: int = Field(default_factory=lambda: random.randint(1, 100))
@@ -25,12 +19,8 @@ class Cell(BaseModel):
 
     async def run(self):
         while True:
-            self.process_environment()
             yield self.env.timeout(1)  # Wait for a week
 
-    def process_environment(self):
-        """Each cell type must implement its environmental impact"""
+    def calculate_co2_impact(self) -> float:
+        """Calculate how much CO2 this cell produces (positive) or absorbs (negative)"""
         raise NotImplementedError
-
-from environment import Environment
-Cell.model_rebuild()
