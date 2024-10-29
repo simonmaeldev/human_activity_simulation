@@ -20,7 +20,7 @@ class BaseAgent(CoreBaseAgent):
     position: Tuple[int, int] = Field(...)
     search_range: int = Field(default=3)
     cell_search_manager: CellSearchManager = Field(...)
-    resource_manager: "ResourceManager" = Field(...)
+    resource_manager: ResourceManager = Field(...)
 
     class Config:
         arbitrary_types_allowed = True

@@ -1,6 +1,5 @@
 from typing import ClassVar
 from .cell import Cell
-from agents import WildlifeAgent, PlantAgent
 
 class Lake(Cell):
     resource_type: ClassVar[str] = "water"

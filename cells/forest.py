@@ -1,6 +1,5 @@
 from typing import ClassVar
 from .cell import Cell
-from agents import WildlifeAgent, PlantAgent, TreeAgent
 
 class Forest(Cell):
     resource_type: ClassVar[str] = "wood"
