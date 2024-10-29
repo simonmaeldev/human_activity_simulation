@@ -3,6 +3,7 @@ import random
 from cells import Cell, City, Forest, Lake
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from agents import HumanAgent, WildlifeAgent, PlantAgent, TreeAgent
 
 class Environment(BaseModel):
     env: simpy.Environment
