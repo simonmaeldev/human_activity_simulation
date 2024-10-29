@@ -21,6 +21,7 @@ class BaseAgent(CoreBaseAgent):
     position: Tuple[int, int] = Field(...)
     search_range: int = Field(default=3)
     cell_search_manager: CellSearchManager = Field(...)
+    resource_manager: "ResourceManager" = Field(...)
 
     class Config:
         arbitrary_types_allowed = True
@@ -51,61 +52,11 @@ class BaseAgent(CoreBaseAgent):
         raise NotImplementedError
     
     def request_resources(self, action: dict):
-        """Request resources from cells/agents based on planned action"""
+        """Request resources via ResourceManager based on planned action"""
         if action['type'] == 'consume':
             target = action['target']  # Cell or Agent
             amount = action['amount']
-            target.add_resource_request(self, amount)
-    
-    def distribute_resources(self):
-        """Distribute resources to requesting agents based on priority"""
-        if not hasattr(self, 'resource_requests'):
-            return
-            
-        requests_by_priority: Dict[AgentPriority, List[Tuple[BaseAgent, float]]] = {}
-        for agent, amount in self.resource_requests.items():
-            priority = agent.priority
-            if priority not in requests_by_priority:
-                requests_by_priority[priority] = []
-            requests_by_priority[priority].append((agent, amount))
-        
-        available = self.get_available_resources()
-        
-        for priority in sorted(requests_by_priority.keys()):
-            requests = requests_by_priority[priority]
-            if not requests:
-                continue
-                
-            if len(requests) == 1:
-                # Single agent at this priority - give what's available
-                agent, amount = requests[0]
-                allocated = min(amount, available)
-                resource = Resource(
-                    name=self.resource_type,
-                    quantity=allocated,
-                    quality=self.health
-                )
-                agent.pending_resources.append(resource)
-                available -= allocated
-            else:
-                # Multiple agents at same priority - split equally
-                total_requested = sum(amount for _, amount in requests)
-                for agent, amount in requests:
-                    if available <= 0:
-                        break
-                    fair_share = (amount / total_requested) * available
-                    resource = Resource(
-                        name=self.resource_type,
-                        quantity=fair_share,
-                        quality=self.health
-                    )
-                    agent.pending_resources.append(resource)
-                    available -= fair_share
-            
-            if available <= 0:
-                break
-        
-        self.resource_requests.clear()
+            self.resource_manager.request_resources(self, target, amount)
     
     def execute_action(self, action: dict):
         """Execute the planned action using allocated resources"""

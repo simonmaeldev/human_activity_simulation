@@ -12,7 +12,6 @@ class Cell(BaseCell):
     ground_pollution: float = Field(default=0.0)
     agents: List["BaseAgent"] = Field(default_factory=list)
     process: Optional[simpy.events.Process] = None
-    resource_requests: Dict[BaseAgent, float] = Field(default_factory=dict)
     max_resources: float = Field(default=0.0)
     current_resources: float = Field(default=0.0)
     regeneration_rate: float = Field(default=0.0)
@@ -74,61 +73,6 @@ class Cell(BaseCell):
         """Calculate total ground pollution impact from all agents in the cell"""
         return sum(agent.calculate_ground_pollution_impact() for agent in self.agents)
         
-    def add_resource_request(self, agent: BaseAgent, amount: float):
-        """Register a resource request from an agent"""
-        self.resource_requests[agent] = amount
-    
-    def distribute_resources(self):
-        """Distribute cell resources to requesting agents based on priority"""
-        if not self.resource_requests:
-            return
-            
-        requests_by_priority: Dict[AgentPriority, List[Tuple[BaseAgent, float]]] = {}
-        for agent, amount in self.resource_requests.items():
-            priority = agent.priority
-            if priority not in requests_by_priority:
-                requests_by_priority[priority] = []
-            requests_by_priority[priority].append((agent, amount))
-        
-        available = self.get_available_resources()
-        
-        for priority in sorted(requests_by_priority.keys()):
-            requests = requests_by_priority[priority]
-            if not requests:
-                continue
-                
-            if len(requests) == 1:
-                # Single agent at this priority - give what's available
-                agent, amount = requests[0]
-                allocated = min(amount, available)
-                resource = Resource(
-                    name=self.resource_type,
-                    quantity=allocated,
-                    # For cells, quality is inverse of ground pollution
-                    quality=max(0.0, 1.0 - self.ground_pollution)
-                )
-                agent.pending_resources.append(resource)
-                available -= allocated
-            else:
-                # Multiple agents at same priority - split equally
-                total_requested = sum(amount for _, amount in requests)
-                for agent, amount in requests:
-                    if available <= 0:
-                        break
-                    fair_share = (amount / total_requested) * available
-                    resource = Resource(
-                        name=self.resource_type,
-                        quantity=fair_share,
-                        # For cells, quality is inverse of ground pollution
-                        quality=max(0.0, 1.0 - self.ground_pollution),
-                    )
-                    agent.pending_resources.append(resource)
-                    available -= fair_share
-            
-            if available <= 0:
-                break
-        
-        self.resource_requests.clear()
     
     def get_available_resources(self) -> float:
         """Get amount of resources available for distribution"""
