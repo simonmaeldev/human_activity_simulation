@@ -3,6 +3,7 @@ import simpy
 from pydantic import BaseModel, Field
 from enum import IntEnum
 from consumableResource import Resource
+from utils.cell_search import CellSearchManager
 
 class AgentPriority(IntEnum):
     HIGHEST = 1
@@ -22,6 +23,9 @@ class BaseAgent(BaseModel):
     population: int = Field(default=1)  # Current number of individuals
     priority: AgentPriority = Field(default=AgentPriority.MEDIUM)
     pending_resources: List["Resource"] = Field(default_factory=list)
+    position: Tuple[int, int] = Field(...)
+    search_range: int = Field(default=3)
+    cell_search_manager: CellSearchManager = Field(...)
 
     class Config:
         arbitrary_types_allowed = True
@@ -127,3 +131,18 @@ class BaseAgent(BaseModel):
     def calculate_ground_pollution_impact(self) -> float:
         """Calculate how much ground pollution this agent produces (positive) or removes (negative)"""
         raise NotImplementedError
+        
+    def has_required_resources(self, cell: 'Cell') -> bool:
+        """
+        Check if a cell has the resources this agent needs.
+        Must be implemented by derived classes.
+        """
+        raise NotImplementedError("Agents must implement has_required_resources")
+
+    def find_resource_cells(self) -> List[Tuple['Cell', float]]:
+        """Find cells with available resources within range"""
+        return self.cell_search_manager.get_valid_cells(
+            self.position,
+            self.search_range,
+            self.has_required_resources
+        )

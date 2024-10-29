@@ -1,6 +1,9 @@
 import simpy
 from pydantic import Field
 from .base_agent import BaseAgent
+from cells.cell import Cell
+from cells.lake import Lake
+from cells.forest import Forest
 
 class WildlifeAgent(BaseAgent):
     """
@@ -23,3 +26,9 @@ class WildlifeAgent(BaseAgent):
     def calculate_ground_pollution_impact(self) -> float:
         """Wildlife has neutral ground pollution impact in this model"""
         return 0.0
+        
+    def has_required_resources(self, cell: Cell) -> bool:
+        """Wildlife looks for water or natural habitats with low pollution"""
+        return (isinstance(cell, (Lake, Forest)) and 
+                cell.ground_pollution < 0.5 and
+                cell.current_resources > 0)

@@ -1,6 +1,9 @@
 import simpy
 from pydantic import Field
 from .base_agent import BaseAgent
+from cells.cell import Cell
+from cells.lake import Lake
+from cells.forest import Forest
 
 class HumanAgent(BaseAgent):
     """
@@ -23,3 +26,8 @@ class HumanAgent(BaseAgent):
     def calculate_ground_pollution_impact(self) -> float:
         """Calculate ground pollution impact based on population"""
         return self.base_pollution_emission * self.population * self.ground_pollution_ratio
+        
+    def has_required_resources(self, cell: Cell) -> bool:
+        """Humans look for water in lakes or food in forests"""
+        return (isinstance(cell, (Lake, Forest)) and 
+                cell.current_resources > 0)
