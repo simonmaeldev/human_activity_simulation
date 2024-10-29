@@ -1,6 +1,6 @@
 import simpy
 import random
-from cells import Cell, City, Forest
+from cells import Cell, City, Forest, Lake
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
@@ -21,7 +21,7 @@ class Environment(BaseModel):
         self.process = self.env.process(self.run())
 
     def create_cell(self, x: int, y: int) -> Cell:
-        cell_class = random.choice([City, Forest])
+        cell_class = random.choice([City, Forest, Lake])
         return cell_class(env=self.env, x=x, y=y)
 
     def run(self):
