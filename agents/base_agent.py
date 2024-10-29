@@ -4,16 +4,9 @@ if TYPE_CHECKING:
     from cells.cell import Cell
 import simpy
 from pydantic import BaseModel, Field
-from enum import IntEnum
 from consumableResource import Resource
 from utils.cell_search import CellSearchManager
-
-class AgentPriority(IntEnum):
-    HIGHEST = 1
-    HIGH = 2
-    MEDIUM = 3
-    LOW = 4
-    LOWEST = 5
+from .enums import AgentPriority
 
 class BaseAgent(BaseModel):
     """

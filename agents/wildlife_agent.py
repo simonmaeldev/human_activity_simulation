@@ -1,9 +1,12 @@
 import simpy
 from pydantic import Field
 from .base_agent import BaseAgent
-from cells.cell import Cell
-from cells.lake import Lake
-from cells.forest import Forest
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cells.cell import Cell
+    from cells.lake import Lake
+    from cells.forest import Forest
 
 class WildlifeAgent(BaseAgent):
     """

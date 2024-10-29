@@ -1,9 +1,12 @@
 import simpy
 import random
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List, Dict, Tuple, ClassVar
-from agents.base_agent import BaseAgent, AgentPriority
+from typing import Optional, List, Dict, Tuple, ClassVar, TYPE_CHECKING
+from agents.enums import AgentPriority
 from consumableResource import Resource
+
+if TYPE_CHECKING:
+    from agents.base_agent import BaseAgent
 
 class Cell(BaseModel):
     env: simpy.Environment

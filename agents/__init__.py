@@ -1,3 +1,4 @@
+from .enums import AgentPriority
 from .base_agent import BaseAgent
 from .human_agent import HumanAgent
 from .tree_agent import TreeAgent
