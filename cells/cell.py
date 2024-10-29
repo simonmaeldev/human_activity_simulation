@@ -1,7 +1,7 @@
 import simpy
 import random
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict, Tuple, ClassVar
 from agents.base_agent import BaseAgent, AgentPriority
 from consumableResource import Resource
 
@@ -14,6 +14,9 @@ class Cell(BaseModel):
     agents: List["BaseAgent"] = Field(default_factory=list)
     process: Optional[simpy.events.Process] = None
     resource_requests: Dict[BaseAgent, float] = Field(default_factory=dict)
+    max_resources: float = Field(default=0.0)
+    current_resources: float = Field(default=0.0)
+    regeneration_rate: float = Field(default=0.0)
 
     @field_validator('air_pollution', 'ground_pollution')
     @classmethod
@@ -36,6 +39,10 @@ class Cell(BaseModel):
         if agent in self.agents:
             self.agents.remove(agent)
 
+    def regenerate_resources(self) -> None:
+        """Base method for resource regeneration. No-op by default."""
+        pass
+
     def run(self):
         while True:
             # Update local pollution levels based on agent impacts
@@ -45,6 +52,9 @@ class Cell(BaseModel):
             # Update pollution levels with impacts, ensuring they don't go below 0
             self.air_pollution = max(0.0, self.air_pollution + air_impact)
             self.ground_pollution = max(0.0, self.ground_pollution + ground_impact)
+
+            # Regenerate resources
+            self.regenerate_resources()
 
             yield self.env.timeout(0)  # Allow all agents to request
             
@@ -123,4 +133,4 @@ class Cell(BaseModel):
     
     def get_available_resources(self) -> float:
         """Get amount of resources available for distribution"""
-        raise NotImplementedError
+        return self.current_resources
