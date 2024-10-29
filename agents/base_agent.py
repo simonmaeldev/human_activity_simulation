@@ -5,6 +5,7 @@ from core_types import BaseAgent as CoreBaseAgent, Resource, AgentPriority
 
 if TYPE_CHECKING:
     from cells.cell import Cell
+    from resource_manager import ResourceManager
 from utils.cell_search import CellSearchManager
 
 class BaseAgent(CoreBaseAgent):
