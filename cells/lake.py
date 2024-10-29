@@ -1,3 +1,4 @@
+from typing import ClassVar
 from .cell import Cell
 from agents import WildlifeAgent, PlantAgent
 
