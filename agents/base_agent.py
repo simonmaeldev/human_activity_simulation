@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple, Optional
 import simpy
 from pydantic import BaseModel, Field
 from enum import IntEnum
-from .resource import Resource
+from ..consumableResource import Resource
 
 class AgentPriority(IntEnum):
     HIGHEST = 1
@@ -80,8 +80,7 @@ class BaseAgent(BaseModel):
                 resource = Resource(
                     name=self.resource_type,
                     quantity=allocated,
-                    quality=self.health,
-                    source=self
+                    quality=self.health
                 )
                 agent.pending_resources.append(resource)
                 available -= allocated
@@ -95,8 +94,7 @@ class BaseAgent(BaseModel):
                     resource = Resource(
                         name=self.resource_type,
                         quantity=fair_share,
-                        quality=self.health,
-                        source=self
+                        quality=self.health
                     )
                     agent.pending_resources.append(resource)
                     available -= fair_share

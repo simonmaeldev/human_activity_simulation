@@ -3,7 +3,7 @@ import random
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Dict, Tuple
 from agents.base_agent import BaseAgent, AgentPriority
-from agents.resource import Resource
+from consumableResource import Resource
 
 class Cell(BaseModel):
     env: simpy.Environment
@@ -94,8 +94,7 @@ class Cell(BaseModel):
                     name=self.resource_type,
                     quantity=allocated,
                     # For cells, quality is inverse of ground pollution
-                    quality=max(0.0, 1.0 - self.ground_pollution),
-                    source=self
+                    quality=max(0.0, 1.0 - self.ground_pollution)
                 )
                 agent.pending_resources.append(resource)
                 available -= allocated
@@ -111,7 +110,6 @@ class Cell(BaseModel):
                         quantity=fair_share,
                         # For cells, quality is inverse of ground pollution
                         quality=max(0.0, 1.0 - self.ground_pollution),
-                        source=self
                     )
                     agent.pending_resources.append(resource)
                     available -= fair_share
