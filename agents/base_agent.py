@@ -1,14 +1,10 @@
-from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from cells.cell import Cell
+from typing import Dict, List, Tuple, Optional
 import simpy
-from pydantic import BaseModel, Field
-from consumableResource import Resource
+from pydantic import Field
+from core_types import BaseAgent as CoreBaseAgent, Resource
 from utils.cell_search import CellSearchManager
-from .enums import AgentPriority
 
-class BaseAgent(BaseModel):
+class BaseAgent(CoreBaseAgent):
     """
     Base class for all agents in the simulation.
     Defines core agent behaviors and decision-making interface.
