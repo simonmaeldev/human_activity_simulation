@@ -44,7 +44,7 @@ class ResourceManager:
         """
         for cell, requests in self.pending_requests.items():
             # Group requests by priority
-            requests_by_priority: Dict[AgentPriority, List[Tuple[BaseAgent, float]]] = {}
+            requests_by_priority: Dict[AgentPriority, List[Tuple[CoreBaseAgent, float]]] = {}
             for agent, amount in requests.items():
                 priority = agent.priority
                 if priority not in requests_by_priority:

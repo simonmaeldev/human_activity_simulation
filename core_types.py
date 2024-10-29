@@ -64,5 +64,5 @@ class CoreBaseAgent(BaseModel):
         arbitrary_types_allowed = True
 
 # Type variables for type hinting
-CellType = TypeVar('CellType', bound=BaseCell)
-AgentType = TypeVar('AgentType', bound=BaseAgent)
+CellType = TypeVar('CellType', bound=CoreBaseCell)
+AgentType = TypeVar('AgentType', bound=CoreBaseAgent)

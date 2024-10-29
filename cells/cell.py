@@ -28,11 +28,11 @@ class Cell(CoreBaseCell):
         super().__init__(**data)
         self.process = self.env.process(self.run())
         
-    def add_agent(self, agent: BaseAgent):
+    def add_agent(self, agent: CoreBaseAgent):
         """Add an agent to this cell"""
         self.agents.append(agent)
         
-    def remove_agent(self, agent: BaseAgent):
+    def remove_agent(self, agent: CoreBaseAgent):
         """Remove an agent from this cell"""
         if agent in self.agents:
             self.agents.remove(agent)
