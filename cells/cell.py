@@ -3,6 +3,7 @@ import random
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Dict, Tuple
 from agents.base_agent import BaseAgent, AgentPriority
+from agents.resource import Resource
 
 class Cell(BaseModel):
     env: simpy.Environment

@@ -1,5 +1,8 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .base_agent import BaseAgent
 
 class Resource(BaseModel):
     """Represents a resource that can be consumed by agents"""

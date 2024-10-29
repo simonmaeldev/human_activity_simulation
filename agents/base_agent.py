@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple, Optional
 import simpy
 from pydantic import BaseModel, Field
 from enum import IntEnum
+from .resource import Resource
 
 class AgentPriority(IntEnum):
     HIGHEST = 1
