@@ -12,6 +12,7 @@ class Cell(BaseModel):
     ground_pollution: float = Field(default=0.0)
     agents: List["BaseAgent"] = Field(default_factory=list)
     process: Optional[simpy.events.Process] = None
+    resource_requests: Dict[BaseAgent, float] = Field(default_factory=dict)
 
     @field_validator('air_pollution', 'ground_pollution')
     @classmethod
@@ -44,6 +45,9 @@ class Cell(BaseModel):
             self.air_pollution = max(0.0, self.air_pollution + air_impact)
             self.ground_pollution = max(0.0, self.ground_pollution + ground_impact)
             
+            # Handle resource distribution
+            self.distribute_resources()
+            
             yield self.env.timeout(1)  # Wait for a week
 
     def calculate_co2_impact(self) -> float:
@@ -57,3 +61,49 @@ class Cell(BaseModel):
     def calculate_ground_pollution_impact(self) -> float:
         """Calculate total ground pollution impact from all agents in the cell"""
         return sum(agent.calculate_ground_pollution_impact() for agent in self.agents)
+        
+    def add_resource_request(self, agent: BaseAgent, amount: float):
+        """Register a resource request from an agent"""
+        self.resource_requests[agent] = amount
+    
+    def distribute_resources(self):
+        """Distribute cell resources to requesting agents based on priority"""
+        if not self.resource_requests:
+            return
+            
+        requests_by_priority: Dict[AgentPriority, List[Tuple[BaseAgent, float]]] = {}
+        for agent, amount in self.resource_requests.items():
+            priority = agent.priority
+            if priority not in requests_by_priority:
+                requests_by_priority[priority] = []
+            requests_by_priority[priority].append((agent, amount))
+        
+        available = self.get_available_resources()
+        
+        for priority in sorted(requests_by_priority.keys()):
+            requests = requests_by_priority[priority]
+            if not requests:
+                continue
+                
+            if len(requests) == 1:
+                agent, amount = requests[0]
+                allocated = min(amount, available)
+                agent.pending_resources[self.resource_type] = allocated
+                available -= allocated
+            else:
+                total_requested = sum(amount for _, amount in requests)
+                for agent, amount in requests:
+                    if available <= 0:
+                        break
+                    fair_share = (amount / total_requested) * available
+                    agent.pending_resources[self.resource_type] = fair_share
+                    available -= fair_share
+            
+            if available <= 0:
+                break
+        
+        self.resource_requests.clear()
+    
+    def get_available_resources(self) -> float:
+        """Get amount of resources available for distribution"""
+        raise NotImplementedError
