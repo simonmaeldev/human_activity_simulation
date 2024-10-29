@@ -26,6 +26,10 @@ class BaseAgent(BaseModel):
     class Config:
         arbitrary_types_allowed = True
     
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.process = self.env.process(self.run())
+    
     def run(self):
         """Main behavior loop for the agent"""
         while True:

@@ -10,21 +10,6 @@ class TreeAgent(BaseAgent):
     height: float = Field(default=1)  # Starting height in meters
     base_co2_absorption: float = Field(default=-2.0, description="Base CO2 absorption per tree (negative means absorption)")
     
-    def run(self):
-        while True:
-            self.make_decision()
-            yield self.env.timeout(1)  # Wait one time step
-            
-    def make_decision(self):
-        """
-        Make decisions about:
-        - Growth rate
-        - Resource absorption
-        - CO2 absorption
-        """
-        # TODO: Implement decision-making logic
-        pass
-
     def calculate_co2_impact(self) -> float:
         """Calculate CO2 absorption based on population and health"""
         return self.base_co2_absorption * self.population * self.health

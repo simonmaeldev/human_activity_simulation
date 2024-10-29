@@ -11,20 +11,6 @@ class WildlifeAgent(BaseAgent):
     - Reproduces when conditions are favorable
     - Health affected by environmental conditions
     """
-    def run(self):
-        while True:
-            self.make_decision()
-            yield self.env.timeout(1)  # Wait one time step
-            
-    def make_decision(self):
-        """
-        Make decisions about:
-        - Movement to find food/better conditions
-        - Feeding to maintain energy
-        - Reproduction when conditions are good
-        """
-        # TODO: Implement decision-making logic
-        pass
         
     def calculate_co2_impact(self) -> float:
         """Wildlife has neutral CO2 impact in this model"""

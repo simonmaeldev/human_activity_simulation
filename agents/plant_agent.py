@@ -13,21 +13,6 @@ class PlantAgent(BaseAgent):
     - Absorbs CO2 during photosynthesis
     - Can spread seeds to nearby cells
     """
-    
-    def run(self):
-        while True:
-            self.make_decision()
-            yield self.env.timeout(1)  # Wait one time step
-            
-    def make_decision(self):
-        """
-        Make decisions about:
-        - Growth rate based on environmental conditions
-        - CO2 absorption through photosynthesis
-        - Seed dispersal when mature
-        """
-        # TODO: Implement decision-making logic
-        pass
         
     def calculate_co2_impact(self) -> float:
         """Calculate CO2 absorption based on population and health"""
