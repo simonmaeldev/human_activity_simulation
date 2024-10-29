@@ -1,4 +1,7 @@
-from typing import List, Tuple, Set, Dict, Optional
+from typing import List, Tuple, Set, Dict, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cells.cell import Cell
 from collections import defaultdict
 import numpy as np
 

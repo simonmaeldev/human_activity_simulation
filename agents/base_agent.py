@@ -1,4 +1,7 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cells.cell import Cell
 import simpy
 from pydantic import BaseModel, Field
 from enum import IntEnum
