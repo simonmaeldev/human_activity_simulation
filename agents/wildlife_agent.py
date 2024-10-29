@@ -11,10 +11,6 @@ class WildlifeAgent(BaseAgent):
     - Reproduces when conditions are favorable
     - Health affected by environmental conditions
     """
-    energy: float = Field(default=100.0)  # Energy level
-    reproduction_threshold: float = Field(default=80.0)  # Energy needed to reproduce
-    movement_cost: float = Field(default=5.0)  # Energy cost per movement
-        
     def run(self):
         while True:
             self.make_decision()
@@ -29,3 +25,15 @@ class WildlifeAgent(BaseAgent):
         """
         # TODO: Implement decision-making logic
         pass
+        
+    def calculate_co2_impact(self) -> float:
+        """Wildlife has neutral CO2 impact in this model"""
+        return 0.0
+        
+    def calculate_air_pollution_impact(self) -> float:
+        """Wildlife has neutral air pollution impact in this model"""
+        return 0.0
+        
+    def calculate_ground_pollution_impact(self) -> float:
+        """Wildlife has neutral ground pollution impact in this model"""
+        return 0.0
