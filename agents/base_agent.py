@@ -20,7 +20,7 @@ class BaseAgent(BaseModel):
     health: float = Field(default=1.0, ge=0.0, le=1.0)  # Health level between 0 and 1
     population: int = Field(default=1)  # Current number of individuals
     priority: AgentPriority = Field(default=AgentPriority.MEDIUM)
-    pending_resources: Dict[str, float] = Field(default_factory=dict)
+    pending_resources: List["Resource"] = Field(default_factory=list)
 
     class Config:
         arbitrary_types_allowed = True
@@ -73,17 +73,31 @@ class BaseAgent(BaseModel):
                 continue
                 
             if len(requests) == 1:
+                # Single agent at this priority - give what's available
                 agent, amount = requests[0]
                 allocated = min(amount, available)
-                agent.pending_resources[self.resource_type] = allocated
+                resource = Resource(
+                    name=self.resource_type,
+                    quantity=allocated,
+                    quality=self.health,
+                    source=self
+                )
+                agent.pending_resources.append(resource)
                 available -= allocated
             else:
+                # Multiple agents at same priority - split equally
                 total_requested = sum(amount for _, amount in requests)
                 for agent, amount in requests:
                     if available <= 0:
                         break
                     fair_share = (amount / total_requested) * available
-                    agent.pending_resources[self.resource_type] = fair_share
+                    resource = Resource(
+                        name=self.resource_type,
+                        quantity=fair_share,
+                        quality=self.health,
+                        source=self
+                    )
+                    agent.pending_resources.append(resource)
                     available -= fair_share
             
             if available <= 0:

@@ -86,17 +86,33 @@ class Cell(BaseModel):
                 continue
                 
             if len(requests) == 1:
+                # Single agent at this priority - give what's available
                 agent, amount = requests[0]
                 allocated = min(amount, available)
-                agent.pending_resources[self.resource_type] = allocated
+                resource = Resource(
+                    name=self.resource_type,
+                    quantity=allocated,
+                    # For cells, quality is inverse of ground pollution
+                    quality=max(0.0, 1.0 - self.ground_pollution),
+                    source=self
+                )
+                agent.pending_resources.append(resource)
                 available -= allocated
             else:
+                # Multiple agents at same priority - split equally
                 total_requested = sum(amount for _, amount in requests)
                 for agent, amount in requests:
                     if available <= 0:
                         break
                     fair_share = (amount / total_requested) * available
-                    agent.pending_resources[self.resource_type] = fair_share
+                    resource = Resource(
+                        name=self.resource_type,
+                        quantity=fair_share,
+                        # For cells, quality is inverse of ground pollution
+                        quality=max(0.0, 1.0 - self.ground_pollution),
+                        source=self
+                    )
+                    agent.pending_resources.append(resource)
                     available -= fair_share
             
             if available <= 0:
