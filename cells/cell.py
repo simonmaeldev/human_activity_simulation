@@ -1,8 +1,8 @@
 import simpy
 import random
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List
-from agents.base_agent import BaseAgent
+from typing import Optional, List, Dict, Tuple
+from agents.base_agent import BaseAgent, AgentPriority
 
 class Cell(BaseModel):
     env: simpy.Environment
