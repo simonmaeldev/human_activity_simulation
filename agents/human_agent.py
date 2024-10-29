@@ -7,11 +7,11 @@ class HumanAgent(BaseAgent):
     Agent representing a human individual in the simulation.
     Makes decisions about resource consumption and movement.
     """
-    # Base emission rates per individual
-    BASE_CO2_EMISSION = 1.0  # Base CO2 emission per person
-    BASE_POLLUTION_EMISSION = 1.0  # Base pollution emission per person
-    AIR_POLLUTION_RATIO = 0.7  # 70% of pollution goes to air
-    GROUND_POLLUTION_RATIO = 0.3  # 30% of pollution goes to ground
+    base_co2_emission: float = Field(default=1.0, description="Base CO2 emission per person")
+    base_pollution_emission: float = Field(default=1.0, description="Base pollution emission per person")
+    air_pollution_ratio: float = Field(default=0.7, description="70% of pollution goes to air")
+    ground_pollution_ratio: float = Field(default=0.3, description="30% of pollution goes to ground")
+    
     def run(self):
         while True:
             self.make_decision()
@@ -29,12 +29,12 @@ class HumanAgent(BaseAgent):
         
     def calculate_co2_impact(self) -> float:
         """Calculate CO2 emissions based on population"""
-        return self.BASE_CO2_EMISSION * self.population
+        return self.base_co2_emission * self.population
         
     def calculate_air_pollution_impact(self) -> float:
         """Calculate air pollution impact based on population"""
-        return self.BASE_POLLUTION_EMISSION * self.population * self.AIR_POLLUTION_RATIO
+        return self.base_pollution_emission * self.population * self.air_pollution_ratio
         
     def calculate_ground_pollution_impact(self) -> float:
         """Calculate ground pollution impact based on population"""
-        return self.BASE_POLLUTION_EMISSION * self.population * self.GROUND_POLLUTION_RATIO
+        return self.base_pollution_emission * self.population * self.ground_pollution_ratio
