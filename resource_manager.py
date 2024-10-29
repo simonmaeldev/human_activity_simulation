@@ -11,7 +11,7 @@ Benefits:
 """
 
 from typing import Dict, List, Tuple, Optional
-from core_types import BaseAgent, BaseCell, Resource, AgentPriority
+from core_types import CoreBaseAgent, CoreBaseCell, Resource, AgentPriority
 import simpy
 
 class ResourceManager:
@@ -22,9 +22,9 @@ class ResourceManager:
     
     def __init__(self, env: simpy.Environment):
         self.env = env
-        self.pending_requests: Dict[BaseCell, Dict[BaseAgent, float]] = {}
+        self.pending_requests: Dict[CoreBaseCell, Dict[CoreBaseAgent, float]] = {}
         
-    def request_resources(self, agent: BaseAgent, cell: BaseCell, amount: float) -> None:
+    def request_resources(self, agent: CoreBaseAgent, cell: CoreBaseCell, amount: float) -> None:
         """
         Register a resource request from an agent to a cell.
         
@@ -78,7 +78,7 @@ class ResourceManager:
         # Clear processed requests
         self.pending_requests.clear()
     
-    def _allocate_resource(self, cell: BaseCell, agent: BaseAgent, amount: float) -> None:
+    def _allocate_resource(self, cell: CoreBaseCell, agent: CoreBaseAgent, amount: float) -> None:
         """
         Create and allocate a resource to an agent.
         

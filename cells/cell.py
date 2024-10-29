@@ -2,15 +2,15 @@ import simpy
 import random
 from pydantic import Field, field_validator
 from typing import Optional, List, Dict, Tuple, ClassVar
-from core_types import BaseCell, BaseAgent, Resource, AgentPriority
+from core_types import CoreBaseCell, CoreBaseAgent, Resource, AgentPriority
 
-class Cell(BaseCell):
+class Cell(CoreBaseCell):
     env: simpy.Environment
     x: int = Field(ge=0)
     y: int = Field(ge=0)
     air_pollution: float = Field(default=0.0)
     ground_pollution: float = Field(default=0.0)
-    agents: List["BaseAgent"] = Field(default_factory=list)
+    agents: List[CoreBaseAgent] = Field(default_factory=list)
     process: Optional[simpy.events.Process] = None
     max_resources: float = Field(default=0.0)
     current_resources: float = Field(default=0.0)

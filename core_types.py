@@ -32,7 +32,7 @@ class Resource(BaseModel):
     quantity: float
     quality: float = Field(ge=0.0, le=1.0)
 
-class BaseCell(BaseModel):
+class CoreBaseCell(BaseModel):
     """
     Abstract base class defining the cell interface.
     All cell types must inherit from this.
@@ -49,7 +49,7 @@ class BaseCell(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-class BaseAgent(BaseModel):
+class CoreBaseAgent(BaseModel):
     """
     Abstract base class defining the agent interface.
     All agent types must inherit from this.

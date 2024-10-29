@@ -1,11 +1,9 @@
-from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
+from typing import Dict, List, Tuple, Optional
 import simpy
 from pydantic import Field
-from core_types import BaseAgent as CoreBaseAgent, Resource, AgentPriority
-
-if TYPE_CHECKING:
-    from cells.cell import Cell
-    from resource_manager import ResourceManager
+from core_types import CoreBaseAgent, Resource, AgentPriority
+from cells.cell import Cell
+from resource_manager import ResourceManager
 from utils.cell_search import CellSearchManager
 
 class BaseAgent(CoreBaseAgent):
