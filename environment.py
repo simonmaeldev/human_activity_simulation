@@ -14,6 +14,8 @@ class Environment(BaseModel):
     height: int = Field(gt=0)
     cells: List[List[Cell]] = Field(default_factory=list)
     process: Optional[simpy.Process] = None
+    cell_search_manager: Optional[CellSearchManager] = None
+    resource_manager: Optional[ResourceManager] = None
 
     class Config:
         arbitrary_types_allowed = True
