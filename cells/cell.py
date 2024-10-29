@@ -2,7 +2,7 @@ import simpy
 import random
 from pydantic import Field, field_validator
 from typing import Optional, List, Dict, Tuple, ClassVar
-from core_types import BaseCell, BaseAgent, Resource
+from core_types import BaseCell, BaseAgent, Resource, AgentPriority
 
 class Cell(BaseCell):
     env: simpy.Environment
