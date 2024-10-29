@@ -11,12 +11,6 @@ class Lake(Cell):
         data.setdefault("current_resources", 1000.0)  # Start full
         data.setdefault("regeneration_rate", 100.0)  # Regenerate 100 units per tick
         super().__init__(**data)
-        # Add initial populations
-        wildlife = WildlifeAgent(env=self.env)
-        plant = PlantAgent(env=self.env)
-        
-        self.add_agent(wildlife)
-        self.add_agent(plant)
         
     def regenerate_resources(self) -> None:
         """Regenerate water resources in the lake"""

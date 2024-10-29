@@ -22,7 +22,26 @@ class Environment(BaseModel):
 
     def create_cell(self, x: int, y: int) -> Cell:
         cell_class = random.choice([City, Forest, Lake])
-        return cell_class(env=self.env, x=x, y=y)
+        cell = cell_class(env=self.env, x=x, y=y)
+        
+        # Add initial populations based on cell type
+        if isinstance(cell, City):
+            human = HumanAgent(env=self.env, position=(x,y))
+            cell.add_agent(human)
+        elif isinstance(cell, Forest):
+            wildlife = WildlifeAgent(env=self.env, position=(x,y))
+            plant = PlantAgent(env=self.env, position=(x,y))
+            tree = TreeAgent(env=self.env, position=(x,y))
+            cell.add_agent(wildlife)
+            cell.add_agent(plant)
+            cell.add_agent(tree)
+        elif isinstance(cell, Lake):
+            wildlife = WildlifeAgent(env=self.env, position=(x,y))
+            plant = PlantAgent(env=self.env, position=(x,y))
+            cell.add_agent(wildlife)
+            cell.add_agent(plant)
+            
+        return cell
 
     def run(self):
         while True:
