@@ -45,6 +45,8 @@ class Cell(BaseModel):
             # Update pollution levels with impacts, ensuring they don't go below 0
             self.air_pollution = max(0.0, self.air_pollution + air_impact)
             self.ground_pollution = max(0.0, self.ground_pollution + ground_impact)
+
+            yield self.env.timeout(0)  # Allow all agents to request
             
             # Handle resource distribution
             self.distribute_resources()
