@@ -11,10 +11,7 @@ class PlantAgent(BaseAgent):
     - Absorbs CO2 during photosynthesis
     - Can spread seeds to nearby cells
     """
-    height: float = Field(default=0.1)  # Starting height in meters
-    maturity: float = Field(default=0.0)  # Maturity level between 0 and 1
-    co2_absorption_rate: float = Field(default=0.05)  # CO2 absorbed per day
-        
+    
     def run(self):
         while True:
             self.make_decision()
