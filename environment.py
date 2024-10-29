@@ -4,6 +4,8 @@ from cells import Cell, City, Forest, Lake
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from agents import HumanAgent, WildlifeAgent, PlantAgent, TreeAgent
+from utils.cell_search import CellSearchManager
+from resource_manager import ResourceManager
 
 class Environment(BaseModel):
     env: simpy.Environment
@@ -18,7 +20,10 @@ class Environment(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
+        self.cell_search_manager = CellSearchManager(self.width, self.height)
+        self.resource_manager = ResourceManager(self.env)
         self.cells = [[self.create_cell(x, y) for y in range(self.height)] for x in range(self.width)]
+        self.cell_search_manager.set_grid(self.cells)
         self.process = self.env.process(self.run())
 
     def create_cell(self, x: int, y: int) -> Cell:
@@ -27,18 +32,48 @@ class Environment(BaseModel):
         
         # Add initial populations based on cell type
         if isinstance(cell, City):
-            human = HumanAgent(env=self.env, position=(x,y))
+            human = HumanAgent(
+                env=self.env,
+                position=(x,y),
+                cell_search_manager=self.cell_search_manager,
+                resource_manager=self.resource_manager
+            )
             cell.add_agent(human)
         elif isinstance(cell, Forest):
-            wildlife = WildlifeAgent(env=self.env, position=(x,y))
-            plant = PlantAgent(env=self.env, position=(x,y))
-            tree = TreeAgent(env=self.env, position=(x,y))
+            wildlife = WildlifeAgent(
+                env=self.env,
+                position=(x,y),
+                cell_search_manager=self.cell_search_manager,
+                resource_manager=self.resource_manager
+            )
+            plant = PlantAgent(
+                env=self.env,
+                position=(x,y),
+                cell_search_manager=self.cell_search_manager,
+                resource_manager=self.resource_manager
+            )
+            tree = TreeAgent(
+                env=self.env,
+                position=(x,y),
+                cell_search_manager=self.cell_search_manager,
+                resource_manager=self.resource_manager
+            )
             cell.add_agent(wildlife)
             cell.add_agent(plant)
             cell.add_agent(tree)
         elif isinstance(cell, Lake):
-            wildlife = WildlifeAgent(env=self.env, position=(x,y))
-            plant = PlantAgent(env=self.env, position=(x,y))
+            wildlife = WildlifeAgent(
+                env=self.env,
+                position=(x,y),
+                cell_search_manager=self.cell_search_manager,
+                resource_manager=self.resource_manager
+            )
+            plant = PlantAgent(
+                env=self.env,
+                position=(x,y),
+                cell_search_manager=self.cell_search_manager,
+                resource_manager=self.resource_manager
+            )
             cell.add_agent(wildlife)
             cell.add_agent(plant)
             
